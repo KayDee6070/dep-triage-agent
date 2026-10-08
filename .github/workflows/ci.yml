@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+# A superseded run tells you nothing. Cancel it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # The gate is ~15s of work. If it ever approaches this, something is
+    # reaching the network that should not be.
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # --frozen: fail if uv.lock is stale rather than silently re-resolving,
+      # so CI tests the dependency set that is actually committed.
+      - name: Install
+        run: uv sync --frozen
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Types
+        run: uv run mypy
+
+      # No model, no network. Real model responses get recorded into committed
+      # fixtures at M2 and replayed here.
+      - name: Tests
+        run: uv run pytest

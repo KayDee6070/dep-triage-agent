@@ -1,0 +1,24 @@
+# Secrets — never commit. tests/test_env_example.py asserts this rule holds.
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+
+# Tooling
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Generated artifacts
+results/
+reports/
+*.gguf
