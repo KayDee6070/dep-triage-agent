@@ -9,10 +9,11 @@ harness that measures whether it actually works.**
 
 | | |
 |---|---|
-| **Current state** | **M0 complete — scope agreed, no code written yet** |
+| **Current state** | **M2 in progress** — fixture and tools built and tested; agent loop pending Ollama |
 | Started | 2026-10-08 |
 | Deadline | 2026-10-21 (14 days) |
 | Results | **None yet.** Measured once on 2026-10-20 — see [Results](#results) |
+| Fixture | 80 packages, 1487 advisories, snapshot 2026-10-08 |
 
 Nothing in this README claims a measurement that has been taken. The empty
 tables below are the exact claims the project will make, written down before
@@ -42,7 +43,9 @@ that result gets published as-is.
 
 Answers questions about pinned Python dependencies against a **frozen offline
 snapshot** of PyPI release metadata and OSV.dev vulnerability records,
-committed to this repository.
+committed to this repository: 80 packages and 1487 advisories as of
+2026-10-08, of which 25 packages carry no advisories at all so that "is X
+vulnerable?" is not always answered yes.
 
 Frozen rather than live for three reasons: the benchmark gives the same numbers
 in six months, the deployed service has no upstream that can go down, and
