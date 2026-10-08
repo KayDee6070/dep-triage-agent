@@ -120,3 +120,56 @@ Full report: [`docs/milestones/M1-report.md`](docs/milestones/M1-report.md).
   expensive across a grown codebase. Recorded rather than quietly changed.
 - **License set to MIT without confirmation.** Flagged in the M1 report as
   unconfirmed; one commit to change.
+
+---
+
+## M2 (part 1) — fixture, tools, fault injection
+
+### My decisions
+
+| Decision | Choice |
+|---|---|
+| Sought a second review before M3 locked the task set | Day-1 update taken to the same senior engineer |
+| Accepted all six review items | Including the two with code consequences, applied before any task curation |
+
+### AI-assisted
+
+- Curated the 80-package set across heavy-CVE / moderate / expected-clean
+  groups, plus 8 reserved nonexistent names for the abstention probe.
+- Built the fixture builder, the schema and loader, the four tools, and the
+  fault-injection wrapper. 102 tests.
+- Measured the environment rather than assuming it: 44.9 tok/s, 37/37 layers on
+  GPU, 6.2 GB VRAM at 8k context.
+- Installed Ollama user-local without sudo, with a `systemctl --user` unit.
+
+### External review — senior engineer, round 2, 2026-10-08
+
+Six items, all applied. Two had code consequences and were done before task
+curation, which was the point of reviewing at this moment:
+
+- **Paired analysis.** Agent-vs-baseline is the same 40 tasks through two
+  systems, so it is reported as wins/ties/losses with a discordant-pair count
+  and an exact McNemar test. The reviewer was explicit that this raises power
+  but does not rescue n=40, so the pair count is always reported alongside.
+- **Two fabrication denominators**, per assertion and per task, never
+  collapsed.
+- **Report tiered by claim type** — existence claims need no rate at all, which
+  makes the most interesting findings statistically free.
+- **Baselines on the same held-out 40, same determinism bar**, with the day-5
+  gate extended to cover all three systems.
+- **Unknown package separated from known-but-clean**, scored.
+- **The 60-version cap reconsidered** — `list_releases` gained `since_version`.
+
+### Errors found and corrected
+
+- **A real gap found while implementing item 5, in the data rather than the
+  plan.** Version-string format varies by package: `django==4.2` exists with 96
+  advisories, `django==4.2.0` never shipped. `lookup_vulnerabilities` was
+  answering "not vulnerable" for versions that never existed — conflating
+  *absent* with *clean*. It now returns a third negative, `version_unknown`.
+  Advisories are checked first, because 2175 version strings in the snapshot
+  are named by an advisory but no longer listed on the index; testing
+  publication first would have hidden every one of them.
+- **Two self-inflicted shell mistakes.** `pgrep -f` / `pkill -f` match the
+  agent's own command line and killed the session twice. `pgrep -x` is the
+  correct form; recorded in memory.

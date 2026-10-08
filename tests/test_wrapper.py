@@ -173,3 +173,37 @@ def test_no_faults_means_no_interference(tiny_fixture: Fixture) -> None:
     payload = kit.lookup_vulnerabilities("demo-pkg", "1.0.0")
     assert payload["vulnerable"] is True
     assert all(c.fault is None for c in kit.calls)
+
+
+# --- since_version passthrough --------------------------------------------
+
+
+def test_since_version_is_recorded_in_the_call(tiny_fixture: Fixture) -> None:
+    """D1 needs to see the argument, since choosing it is part of the skill."""
+    kit = Toolkit(tiny_fixture)
+    kit.list_releases("demo-pkg", since_version="1.1.0")
+    assert kit.calls[0].arguments == {"package": "demo-pkg", "since_version": "1.1.0"}
+    assert kit.calls[0].result is not None
+    assert kit.calls[0].result["versions"] == ["1.1.0", "2.0.0"]
+
+
+def test_omitted_since_version_records_as_none(tiny_fixture: Fixture) -> None:
+    kit = Toolkit(tiny_fixture)
+    kit.list_releases("demo-pkg")
+    assert kit.calls[0].arguments["since_version"] is None
+
+
+def test_differing_floors_are_not_repeat_calls(tiny_fixture: Fixture) -> None:
+    kit = Toolkit(tiny_fixture)
+    kit.list_releases("demo-pkg", since_version="1.0.0")
+    kit.list_releases("demo-pkg", since_version="1.1.0")
+    assert kit.calls[0].signature() != kit.calls[1].signature()
+
+
+def test_invalid_argument_is_not_recorded_as_a_tool_failure(tiny_fixture: Fixture) -> None:
+    """The tool worked; the agent's argument did not. ok stays True."""
+    kit = Toolkit(tiny_fixture)
+    payload = kit.list_releases("demo-pkg", since_version="nonsense")
+    assert payload["status"] == "invalid_argument"
+    assert kit.calls[0].ok is True
+    assert kit.calls[0].fault is None

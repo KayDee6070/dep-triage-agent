@@ -22,12 +22,15 @@ from dep_triage.fixture import Fixture, normalise, sort_key
 
 #: ``list_releases`` caps its output. Django alone has several hundred releases,
 #: and an 8k context cannot absorb that alongside the rest of a conversation.
-#: Tasks are curated so the answer falls inside the window, and the result says
-#: when it truncated so the agent is never silently misled.
+#: The result always says when it truncated, so the agent is never silently
+#: misled. ``since_version`` exists so the agent can avoid truncation itself
+#: rather than having tasks curated around the cap — see
+#: :func:`list_releases`.
 RELEASE_WINDOW = 60
 
 LookupStatus = Literal["ok", "package_unknown"]
 CompatStatus = Literal["ok", "package_unknown", "version_unknown"]
+ReleaseStatus = Literal["ok", "package_unknown", "invalid_argument"]
 
 _OPTION_PREFIXES = ("-r", "-e", "-c", "--", "-f", "-i")
 
@@ -96,19 +99,36 @@ class AdvisorySummary(BaseModel):
 
 
 class VulnerabilityLookup(BaseModel):
-    status: LookupStatus
+    status: CompatStatus
     package: str
     version: str
     vulnerable: bool = False
     advisories: list[AdvisorySummary] = Field(default_factory=list)
 
+    #: Whether the index still lists this version. False with ``status="ok"``
+    #: means the version was withdrawn but advisories still name it.
+    version_published: bool = False
+
 
 def lookup_vulnerabilities(fixture: Fixture, package: str, version: str) -> VulnerabilityLookup:
     """Advisories affecting one exact version.
 
-    ``status="package_unknown"`` is a distinct outcome from an empty advisory
-    list, and keeping them apart is what makes the abstention probe scorable: a
-    package we hold no data on must produce "unknown", never "not vulnerable".
+    Three negative outcomes are kept apart, because an agent that collapses
+    them is making a nameable mistake rather than a rounding error:
+
+    * ``package_unknown`` — we hold no data. The answer is "unknown", never
+      "not vulnerable".
+    * ``version_unknown`` — the package is known but this version was never
+      published. ``django==4.2.0`` looks plausible and does not exist; ``4.2``
+      does, and carries 96 advisories. Answering "not vulnerable" for a version
+      that never shipped is wrong in a way that matters.
+    * ``ok`` with no advisories — genuinely clean.
+
+    Advisories are checked **before** the published-version test, deliberately.
+    2175 version strings in the snapshot are named by an advisory but no longer
+    listed on the index: withdrawn releases and pre-release builds. Testing
+    publication first would report those as unknown and hide a real
+    vulnerability.
     """
     key = normalise(package)
     if not fixture.has_package(key):
@@ -126,12 +146,21 @@ def lookup_vulnerabilities(fixture: Fixture, package: str, version: str) -> Vuln
         if version in record.affected_versions
     ]
 
+    meta = fixture.package(key)
+    published = meta is not None and meta.release(version) is not None
+
+    if not advisories and not published:
+        return VulnerabilityLookup(
+            status="version_unknown", package=key, version=version, version_published=False
+        )
+
     return VulnerabilityLookup(
         status="ok",
         package=key,
         version=version,
         vulnerable=bool(advisories),
         advisories=advisories,
+        version_published=published,
     )
 
 
@@ -139,29 +168,79 @@ def lookup_vulnerabilities(fixture: Fixture, package: str, version: str) -> Vuln
 
 
 class ReleaseList(BaseModel):
-    status: LookupStatus
+    status: ReleaseStatus
     package: str
     versions: list[str] = Field(default_factory=list)
     yanked: list[str] = Field(default_factory=list)
+
+    #: The package's newest release, independent of any filter.
     latest: str | None = None
+
+    #: Versions matching the query, before the window cap was applied.
     total_count: int = 0
     truncated: bool = False
 
+    #: Echoed back so a trace shows what the agent actually asked for.
+    since_version: str | None = None
+    error: str | None = None
 
-def list_releases(fixture: Fixture, package: str) -> ReleaseList:
-    """Published versions, oldest first, capped at :data:`RELEASE_WINDOW`.
+
+def _at_least(version: str, floor: Version) -> bool:
+    try:
+        return Version(version) >= floor
+    except InvalidVersion:
+        # Unparseable versions cannot be ordered against the floor, so they are
+        # excluded from a filtered query rather than guessed at.
+        return False
+
+
+def list_releases(fixture: Fixture, package: str, since_version: str | None = None) -> ReleaseList:
+    """Published versions, ascending, capped at :data:`RELEASE_WINDOW`.
 
     Needed alongside :func:`lookup_vulnerabilities` for "minimum safe version":
     an advisory's ``fixed`` boundary is not always a version that shipped, and
     answering from the advisory alone names versions nobody can install.
+
+    ``since_version`` narrows the result to versions at or above a floor. It
+    exists so the agent can avoid truncation by asking a targeted question,
+    rather than the benchmark having to curate tasks around the cap — which
+    would be a selection effect on what the benchmark can measure. Choosing a
+    sensible floor is therefore part of what gets measured: argument
+    construction, not just tool choice.
+
+    The window slides to the relevant end of the list. Unfiltered, the newest
+    versions matter, so the cap keeps the tail. Filtered, the answer sits just
+    above the floor, so the cap keeps the head.
     """
     key = normalise(package)
     meta = fixture.package(key)
     if meta is None:
-        return ReleaseList(status="package_unknown", package=key)
+        return ReleaseList(status="package_unknown", package=key, since_version=since_version)
 
     every = sorted(meta.versions, key=sort_key)
-    window = every[-RELEASE_WINDOW:]
+    latest = every[-1] if every else None
+
+    if since_version is None:
+        candidates = every
+        window = candidates[-RELEASE_WINDOW:]
+    else:
+        try:
+            floor = Version(since_version)
+        except InvalidVersion:
+            # A rejected argument is a measurable outcome, not a crash. An agent
+            # passing "1.26.x" gets told why, and the harness records it.
+            return ReleaseList(
+                status="invalid_argument",
+                package=key,
+                latest=latest,
+                since_version=since_version,
+                error=(
+                    f"{since_version!r} is not a valid version. "
+                    "Pass an exact version such as '1.26.4'."
+                ),
+            )
+        candidates = [v for v in every if _at_least(v, floor)]
+        window = candidates[:RELEASE_WINDOW]
 
     return ReleaseList(
         status="ok",
@@ -171,9 +250,10 @@ def list_releases(fixture: Fixture, package: str) -> ReleaseList:
             (r.version for r in meta.releases if r.yanked and r.version in set(window)),
             key=sort_key,
         ),
-        latest=every[-1] if every else None,
-        total_count=len(every),
-        truncated=len(every) > len(window),
+        latest=latest,
+        total_count=len(candidates),
+        truncated=len(candidates) > len(window),
+        since_version=since_version,
     )
 
 

@@ -15,7 +15,10 @@ Revision history is at §16. Everything below is the current plan.
 | Tools | 4 (`parse_requirements`, `lookup_vulnerabilities`, `list_releases`, `check_compatibility`) |
 | Task set | 60 tasks, **split 20 dev / 40 held-out, declared before any measurement** |
 | Primary metric | **End-to-end answer accuracy.** The three required metrics are diagnostics that explain it. |
-| Baselines | **`no-agent` (call everything) and `always-lookup`** — measured on the same splits |
+| Baselines | **`no-agent` (call everything) and `always-lookup`** — same 40 held-out tasks, same determinism bar |
+| Agent vs baseline | **Paired**: wins/ties/losses + discordant-pair count + McNemar exact |
+| Fabrication | **Two denominators** — per assertion (headline) and per task |
+| Reporting | **Tiered by claim type** — existence / comparison / rate |
 | Agent model | Qwen3-8B Q4_K_M, local, via Ollama |
 | Model switch trigger | **Dev subset under 30% task accuracy at end of M2 → switch to Qwen2.5-7B-Instruct** |
 | Reproducibility | `temperature=0` + fixed seed, **verified day 5**, not day 9 |
@@ -89,8 +92,8 @@ slow, the corpus shrinks and the design survives.
 | # | Tool | Returns |
 |---|---|---|
 | 1 | `parse_requirements(text)` | `[(name, pinned_version), …]` |
-| 2 | `lookup_vulnerabilities(pkg, version)` | OSV records, `[]`, or `package unknown` |
-| 3 | `list_releases(pkg)` | ordered list of real releases |
+| 2 | `lookup_vulnerabilities(pkg, version)` | OSV records, or one of three distinct negatives (§3.6) |
+| 3 | `list_releases(pkg, since_version=None)` | published versions at or above a floor |
 | 4 | `check_compatibility(pkg, version)` | `requires_python` + declared deps |
 
 The tools are deliberately **non-substitutable**. Each question class needs a
@@ -109,27 +112,38 @@ list (§13), not first.
 the dev 20. The held-out 40 is touched **once**, on day 13, and that is the
 reported result.
 
-| Class | Total | Dev | Held-out | Required tools | Answer type |
+| Class | Total | Dev | Held-out | Required tools | Correct answer |
 |---|---|---|---|---|---|
-| Is `pkg==X` vulnerable? | 12 | 4 | 8 | 2 | bool + CVE set |
+| Is `pkg==X` vulnerable? — affected | 10 | 3 | 7 | 2 | yes + CVE set |
+| Is `pkg==X` vulnerable? — known, zero advisories | 6 | 2 | 4 | 2 | **not vulnerable** |
+| Unpublished version — **abstention probe** | 4 | 2 | 2 | 2 | **that version never shipped** |
+| Unknown package — **abstention probe** | 6 | 2 | 4 | 2 | **unknown** |
 | Minimum safe version? | 12 | 4 | 8 | 2, 3 | version string |
-| Which packages in this file are vulnerable? | 12 | 4 | 8 | 1, 2 | set of names |
-| Can I upgrade on Python `N`? | 10 | 3 | 7 | 2, 3, 4 | bool + reason |
-| Unknown package — **abstention probe** | 8 | 3 | 5 | 2 | must answer "unknown" |
-| Direct CVE lookup — **over-call probe** | 6 | 2 | 4 | 2 | affected ranges |
+| Which packages in this file are vulnerable? | 10 | 3 | 7 | 1, 2 | set of names |
+| Can I upgrade on Python `N`? | 8 | 3 | 5 | 2, 3, 4 | bool + reason |
+| Direct CVE lookup — **over-call probe** | 4 | 1 | 3 | 2 | affected ranges |
 | **Total** | **60** | **20** | **40** | | |
 
 Both halves cover all six classes, so the dev subset is representative and the
 held-out set isn't measuring something the dev set never saw.
 
-Two probe classes earn their place:
+Four classes exist to catch specific failures rather than to measure general
+competence:
 
-- **Abstention probe.** The package is absent from the snapshot. The only
-  correct answer is "I don't know." Anything specific is a fabrication, and we
-  know it is, because we own the fixture.
+- **Known, zero advisories.** 25 of the 80 packages carry no advisories at all.
+  The correct answer is "not vulnerable" — a positive claim, distinct from
+  "unknown".
+- **Unpublished version.** The package is known; the version never shipped.
+  `django==4.2.0` looks entirely plausible and does not exist, while `4.2` does
+  and carries 96 advisories. See §3.6.
+- **Unknown package.** No data at all. The only correct answer is "unknown".
 - **Over-call probe.** The question needs exactly one tool and no parsing. An
-  agent that calls `parse_requirements` here is over-calling, which feeds
-  metric D3.
+  agent that calls `parse_requirements` here is over-calling, which feeds D3.
+
+The first three share `vulnerable=False` and differ only in `status`, so an
+agent reading one field conflates all three. That conflation is a named,
+scored failure mode — `negative_conflation_rate` in §4.2 — not a rounding
+error.
 
 "Minimum safe version" requires tools 2 **and** 3 because the fix version must
 be one that actually exists on PyPI. An agent answering from the OSV record
@@ -146,6 +160,26 @@ equality). No LLM judge — see §10.2.
 Whichever fixture tables the script had to read to produce the answer determine
 which tools are necessary. No hand-labelling, and no opinion involved.
 
+### 3.6 Three negatives, not one
+
+A finding from the built fixture, not from the plan. Version-string format
+varies by package: 694 published versions are shaped `X.Y`, 10762 are `X.Y.Z`.
+So `django==4.2` exists and carries 96 advisories while `django==4.2.0` never
+shipped; `flask==2.0.0` exists and is affected while `flask==2.0` does not.
+
+`lookup_vulnerabilities` therefore distinguishes:
+
+| Outcome | Meaning | Correct answer |
+|---|---|---|
+| `package_unknown` | no data held | "unknown" |
+| `version_unknown` | package known, version never published | "that version does not exist" |
+| `ok`, `vulnerable=false` | published and genuinely clean | "not vulnerable" |
+
+**Advisories are checked before the publication test.** 2175 version strings in
+the snapshot are named by an advisory but no longer listed on the index —
+withdrawn releases and pre-release builds. Testing publication first would
+report every one of them as unknown and hide a real vulnerability.
+
 ---
 
 ## 4. Metrics
@@ -155,11 +189,32 @@ which tools are necessary. No hand-labelling, and no opinion involved.
 **`task_accuracy`** — fraction of tasks whose final answer exactly matches
 ground truth.
 
-This is the headline. The three metrics below are **diagnostics that explain
-it**, not peers of it. 90% tool selection with 40% task accuracy is a
+This is the headline. The three diagnostic families below **explain** it; they
+are not peers of it. 90% tool selection with 40% task accuracy is a
 fascinating finding; without the denominator it is noise.
 
-Reported for: the agent, and both baselines (§5), on the same splits.
+Reported for the agent and both baselines (§5), on the same splits.
+
+**The agent-vs-baseline comparison is paired, not two independent
+proportions.** Same 40 tasks, same ground truth, two systems — so the
+information lives in the **discordant pairs**, and treating them as
+independent throws most of it away.
+
+| Reported | Definition |
+|---|---|
+| `wins` | agent correct, baseline wrong |
+| `losses` | baseline correct, agent wrong |
+| `ties` | both correct, or both wrong |
+| `discordant_pairs` | `wins + losses` |
+| McNemar exact | two-sided binomial on the discordant pairs, p = 2·P(X ≤ min(wins, losses)) under Binom(n_discordant, ½) |
+
+Exact binomial, not the chi-square approximation, because the discordant count
+will be small.
+
+**Pairing improves power substantially; it does not rescue n=40.** With 9
+discordant pairs an 8–1 split is significant; with 4 pairs a 4–0 split is not.
+`discordant_pairs` is therefore reported alongside every comparison so a reader
+can see which case they are looking at, rather than having to infer it.
 
 ### 4.2 D1 — tool selection
 
@@ -171,6 +226,17 @@ Scored against the **minimal necessary** set derived in §3.5.
 | `tool_precision` | \|called ∩ necessary\| / \|called\| | **Soft.** Extra calls are waste, not error. |
 | `first_call_accuracy` | fraction where the first tool called is the expected one (determinate tasks only) | Reported |
 | `no_tool_discipline` | on tasks needing no tool, fraction calling zero tools | Reported |
+
+Two additions beyond tool choice:
+
+| Metric | Definition |
+|---|---|
+| `negative_conflation_rate` | fraction of §3.6 tasks where the agent gave the wrong negative — "not vulnerable" for an unknown package, "unknown" for a clean one, and so on |
+| `invalid_argument_rate` | fraction of calls rejected for a malformed argument, e.g. `since_version="1.26.x"` |
+
+`invalid_argument_rate` exists because `list_releases` now takes a floor
+(§3.3), which makes **argument construction** measurable rather than just tool
+choice. That is closer to how agents actually fail.
 
 `exact_set_match` is **demoted to a footnote**, labelled "perfect-routing rate
 — reported for interest, not a quality measure." It assumes a single valid tool
@@ -215,9 +281,22 @@ then:
 | `fabrication_hard` | the token appears **nowhere** in the fixture → invented outright |
 | `fabrication_misattributed` | the token exists in the fixture but not for the package under discussion → wrong attribution |
 
-**`fabrication_rate` is reported explicitly as a lower bound.** An agent that
-implies a version without naming it is undetectable by this method. The report
-states that limitation rather than letting the number read as complete.
+**Two denominators, both reported, never collapsed.** They answer different
+questions and have very different precision:
+
+| Rate | Denominator | Reading |
+|---|---|---|
+| `fabrication_per_assertion` | every version string and advisory ID asserted | **The headline.** Large n, tight interval. |
+| `fabrication_per_task` | fault-injected tasks producing ≥1 fabrication | Wide interval at n=20–60, but it is the number a reader intuitively wants. |
+
+A single task can assert a dozen versions, so the per-assertion rate has far
+more statistical weight while the per-task rate is the one people reason about.
+Reporting only one would either hide the precision or answer the wrong
+question.
+
+**Both are explicitly lower bounds.** An agent that implies a version without
+naming it is undetectable by string extraction. The report states that rather
+than letting the numbers read as complete.
 
 This is the metric the project exists to publish. It is also the most fragile
 one, which is why it carries its own caveat in the report.
@@ -237,6 +316,43 @@ Planning number: ~25 s/task on Qwen3-8B at ~35–50 tok/s.
 | **Final held-out run, total** | **~180 executions** | **~60 min** | **one shot** |
 
 The final run is a single ~1 h job. Everything in it is touched once.
+
+### 4.7 Report structure — by claim type
+
+The sample size (§4.8) cannot support one headline number carrying every
+conclusion. So claims are reported in three tiers, each with the treatment it
+can actually sustain:
+
+| Claim type | Example | How it is reported |
+|---|---|---|
+| **Existence** | "the agent fabricates a fix version when the advisory tool returns a malformed record" | One example plus its full trace. **n=1 suffices; no rate.** |
+| **Comparison** | "the agent beats call-everything" | Paired: wins / ties / losses + `discordant_pairs` + McNemar (§4.1) |
+| **Rate** | "`fabrication_per_task` is 15%" | Point estimate **with interval**, and the word "inconclusive" when the interval is wide |
+
+Existence claims are statistically free and are likely the most interesting
+output of this project — a reproducible trace of a named failure mode needs no
+confidence interval. The percentage headline stays, but it stops being asked to
+carry weight it cannot bear.
+
+### 4.8 What the sample size can and cannot support
+
+40 held-out tasks. Unpaired, a headline accuracy figure carries roughly
+**±15 percentage points** at 95% confidence; the fault suite is ~**±22pp** at
+20 tasks per mode.
+
+More tasks is not the fix. 80 held-out reaches only ~±11pp and ~96 are needed
+for ±10pp, which this time budget cannot buy without gutting the harness that
+is the deliverable.
+
+Two things make this workable rather than fatal:
+
+1. **Pairing** (§4.1) moves the agent-vs-baseline comparison off independent
+   proportions and onto discordant pairs, which is far more powerful at this n.
+2. **Tiering** (§4.7) stops the percentage from carrying claims it cannot
+   support, and routes the most interesting findings to existence claims that
+   need no interval at all.
+
+Neither makes n=40 behave like n=400. The report says so.
 
 ---
 
@@ -275,6 +391,22 @@ which question classes genuinely need routing.
 | Agent < `no-agent` | routing actively hurts; the most interesting result available |
 | `always-lookup` ≈ agent | the task set is too easy; say so |
 
+### 5.4 Both baselines run on the held-out 40
+
+Not a subset, not a different sample — **the same 40 tasks as the agent**. The
+paired comparison in §4.1 is invalid otherwise: wins and losses are only
+defined per task, against the same task.
+
+### 5.5 Baselines are held to the same determinism bar
+
+`no-agent` still calls the model once for its final answer, so it carries
+sampling variance exactly as the agent does. `always-lookup` likewise.
+
+`temperature=0` and a fixed seed apply to **every** system under measurement,
+and the day-5 reproducibility gate (§6) covers the agent *and* both baselines.
+A baseline that wobbles between runs would make the paired comparison
+unreproducible even if the agent were perfectly stable.
+
 **Baselines are never cut.** See §13.
 
 ---
@@ -282,7 +414,12 @@ which question classes genuinely need routing.
 ## 6. Reproducibility — verified day 5
 
 `temperature=0` and a fixed seed, then **run the dev subset twice at end of M2
-and confirm the metrics are byte-identical.**
+and confirm the metrics are byte-identical — for the agent and for both
+baselines.**
+
+All three are measured systems, and all three call the model. Checking only the
+agent would leave the paired comparison (§4.1) resting on an unverified
+assumption about the baselines.
 
 Checked on day 5, not day 9, because it is cheap now and expensive later.
 
@@ -541,6 +678,11 @@ push, not a first attempt.
 
 No buffer day. If day 13 slips, §13 activates.
 
+**The two-day cushion earned on day 1 is not spare capacity.** Scaffolding and
+a data fetcher went fast; that says nothing about curating 60 unambiguous tasks
+with ground truth. M3 keeps its full three days, and the cushion is not
+available for added scope — see §11.
+
 ---
 
 ## 15. Definition of done for the project
@@ -558,6 +700,29 @@ Not "polished". Done when all six hold:
 ---
 
 ## 16. Revision history
+
+### 2026-10-08 — senior engineer review, round 2
+
+Day-1 work approved. Six changes before M3 locks the task set.
+
+| # | Change | Where |
+|---|---|---|
+| 1 | Agent-vs-baseline analysed as a **paired** comparison — wins/ties/losses, discordant-pair count, exact McNemar. Pairing raises power at n=40; it does not rescue it, so the pair count is always reported. | §4.1 |
+| 2 | `fabrication_rate` split into **two denominators** — per assertion (headline, tight) and per task (wide, but what readers want). Never collapsed. | §4.5 |
+| 3 | **Report tiered by claim type** — existence (n=1 + trace, no rate), comparison (paired), rate (interval, or "inconclusive"). | §4.7 |
+| 4 | Baselines run on the **same held-out 40** and are held to the **same determinism bar**; the day-5 gate covers all three systems, not just the agent. | §5.4, §5.5, §6 |
+| 5 | **Unknown package separated from known-but-clean**, scored as `negative_conflation_rate`. | §3.4, §3.6, §4.2 |
+| 6 | **60-version cap reconsidered.** `list_releases` now takes `since_version`, so the agent can avoid truncation itself instead of tasks being curated around the cap. Argument construction becomes measurable; `invalid_argument_rate` added. | §3.3, §4.2 |
+
+Item 6 removed a selection effect on the benchmark: the cap previously
+constrained which tasks could be written at all. It also turned out to be
+necessary rather than cosmetic — boto3 carries 2132 releases and django 438,
+so an unfiltered listing was never going to fit an 8k context.
+
+Working item 5 surfaced a third negative outcome the review did not name, found
+in the built data rather than the plan: a package can be known while the
+*version* was never published. `django==4.2.0` looks plausible and does not
+exist; `4.2` does and carries 96 advisories. See §3.6.
 
 ### 2026-10-07 — senior engineer review
 

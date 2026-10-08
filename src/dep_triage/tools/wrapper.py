@@ -76,7 +76,7 @@ def _empty(tool: str, payload: dict[str, Any]) -> dict[str, Any]:
     elif tool == "lookup_vulnerabilities":
         blanked.update(vulnerable=False, advisories=[])
     elif tool == "list_releases":
-        blanked.update(versions=[], yanked=[], latest=None, total_count=0)
+        blanked.update(versions=[], yanked=[], latest=None, total_count=0, truncated=False)
     elif tool == "check_compatibility":
         blanked.update(
             requires_python=None,
@@ -203,12 +203,17 @@ class Toolkit:
             {"package": package, "version": version},
         )
 
-    def list_releases(self, package: str) -> dict[str, Any]:
-        """List the versions of a package that were actually published."""
+    def list_releases(self, package: str, since_version: str | None = None) -> dict[str, Any]:
+        """List published versions of a package.
+
+        Pass ``since_version`` to narrow the result to versions at or above a
+        floor — useful when a package has hundreds of releases and only those
+        after a known-vulnerable version matter.
+        """
         return self._invoke(
             "list_releases",
-            lambda: triage.list_releases(self._fixture, package),
-            {"package": package},
+            lambda: triage.list_releases(self._fixture, package, since_version),
+            {"package": package, "since_version": since_version},
         )
 
     def check_compatibility(

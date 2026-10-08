@@ -181,3 +181,135 @@ def test_compatibility_returns_unknown_for_a_nonsense_python(tiny_fixture: Fixtu
     """Better than False, which would read as a definite incompatibility."""
     result = triage.check_compatibility(tiny_fixture, "demo-pkg", "1.0.0", "3.x")
     assert result.python_compatible is None
+
+
+# --- list_releases: since_version filter ----------------------------------
+
+
+def _many_release_fixture(tiny_fixture: Fixture) -> Fixture:
+    """demo-pkg with 1.0.0 .. 1.0.99, far more than the window."""
+    meta = tiny_fixture.packages["demo-pkg"]
+    cls = type(meta.releases[0])
+    meta.releases = [cls(version=f"1.0.{n}") for n in range(100)]
+    return tiny_fixture
+
+
+def test_since_version_filters_to_the_floor(tiny_fixture: Fixture) -> None:
+    result = triage.list_releases(tiny_fixture, "demo-pkg", since_version="1.1.0")
+    assert result.status == "ok"
+    assert result.versions == ["1.1.0", "2.0.0"]
+    assert result.since_version == "1.1.0"
+    assert result.total_count == 2
+
+
+def test_since_version_is_inclusive(tiny_fixture: Fixture) -> None:
+    result = triage.list_releases(tiny_fixture, "demo-pkg", since_version="2.0.0")
+    assert result.versions == ["2.0.0"]
+
+
+def test_unfiltered_window_keeps_the_newest(tiny_fixture: Fixture) -> None:
+    """Without a floor, recent releases are what matter."""
+    result = triage.list_releases(_many_release_fixture(tiny_fixture), "demo-pkg")
+    assert result.truncated is True
+    assert result.total_count == 100
+    assert result.versions[-1] == "1.0.99"
+    assert len(result.versions) == triage.RELEASE_WINDOW
+
+
+def test_filtered_window_keeps_the_oldest_above_the_floor(tiny_fixture: Fixture) -> None:
+    """With a floor, the minimum safe version sits just above it."""
+    result = triage.list_releases(
+        _many_release_fixture(tiny_fixture), "demo-pkg", since_version="1.0.10"
+    )
+    assert result.versions[0] == "1.0.10"
+    assert len(result.versions) == triage.RELEASE_WINDOW
+    assert result.total_count == 90
+
+
+def test_a_good_floor_avoids_truncation_entirely(tiny_fixture: Fixture) -> None:
+    """The point of the argument: the agent can dodge the cap itself."""
+    result = triage.list_releases(
+        _many_release_fixture(tiny_fixture), "demo-pkg", since_version="1.0.50"
+    )
+    assert result.truncated is False
+    assert result.total_count == 50
+
+
+def test_latest_ignores_the_filter(tiny_fixture: Fixture) -> None:
+    result = triage.list_releases(tiny_fixture, "demo-pkg", since_version="1.0.0")
+    assert result.latest == "2.0.0"
+
+
+def test_invalid_floor_is_a_measurable_outcome_not_a_crash(tiny_fixture: Fixture) -> None:
+    """An agent passing "1.26.x" must be told why, and it must be recorded."""
+    result = triage.list_releases(tiny_fixture, "demo-pkg", since_version="1.26.x")
+    assert result.status == "invalid_argument"
+    assert result.versions == []
+    assert result.error is not None and "1.26.x" in result.error
+    assert result.since_version == "1.26.x"
+    assert result.latest == "2.0.0", "the package is known, only the argument was bad"
+
+
+def test_floor_above_every_release_returns_empty_not_unknown(tiny_fixture: Fixture) -> None:
+    result = triage.list_releases(tiny_fixture, "demo-pkg", since_version="99.0.0")
+    assert result.status == "ok"
+    assert result.versions == []
+    assert result.total_count == 0
+
+
+def test_unknown_package_echoes_the_floor(tiny_fixture: Fixture) -> None:
+    result = triage.list_releases(tiny_fixture, "absent-pkg", since_version="1.0.0")
+    assert result.status == "package_unknown"
+    assert result.since_version == "1.0.0"
+
+
+# --- lookup_vulnerabilities: the three negative outcomes ------------------
+
+
+def test_three_negatives_are_distinguishable(tiny_fixture: Fixture) -> None:
+    """unknown package / unpublished version / genuinely clean."""
+    unknown_pkg = triage.lookup_vulnerabilities(tiny_fixture, "absent-pkg", "1.0.0")
+    unknown_ver = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "4.5.6")
+    clean = triage.lookup_vulnerabilities(tiny_fixture, "clean-pkg", "0.1.0")
+
+    assert unknown_pkg.status == "package_unknown"
+    assert unknown_ver.status == "version_unknown"
+    assert clean.status == "ok"
+
+    # All three report vulnerable=False, so status is the only thing that
+    # separates them. An agent reading only `vulnerable` conflates all three.
+    assert (unknown_pkg.vulnerable, unknown_ver.vulnerable, clean.vulnerable) == (
+        False,
+        False,
+        False,
+    )
+    assert len({unknown_pkg.status, unknown_ver.status, clean.status}) == 3
+
+
+def test_clean_published_version_is_flagged_published(tiny_fixture: Fixture) -> None:
+    result = triage.lookup_vulnerabilities(tiny_fixture, "clean-pkg", "0.1.0")
+    assert result.status == "ok"
+    assert result.version_published is True
+    assert result.vulnerable is False
+
+
+def test_advisories_win_over_unpublished_version(tiny_fixture: Fixture) -> None:
+    """A withdrawn release still named by an advisory is vulnerable, not unknown.
+
+    2175 version strings in the real snapshot are in this state. Testing
+    publication first would hide every one of them.
+    """
+    record = tiny_fixture.vulnerabilities["demo-pkg"][0]
+    record.affected_versions = [*record.affected_versions, "0.9.0"]  # never published
+
+    result = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "0.9.0")
+    assert result.status == "ok"
+    assert result.vulnerable is True
+    assert result.version_published is False
+
+
+def test_plausible_but_nonexistent_pin_is_not_called_clean(tiny_fixture: Fixture) -> None:
+    """The django==4.2.0 trap: looks like a version, never shipped."""
+    result = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "1.0")
+    assert result.status == "version_unknown"
+    assert result.vulnerable is False
