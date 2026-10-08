@@ -15,6 +15,7 @@ from __future__ import annotations
 import functools
 import json
 import re
+from collections.abc import Iterable
 from pathlib import Path
 
 from packaging.version import InvalidVersion, Version
@@ -33,6 +34,57 @@ def normalise(name: str) -> str:
     package being unknown, which is a different finding entirely.
     """
     return _NORMALISE_RE.sub("-", name.strip().lower())
+
+
+@functools.lru_cache(maxsize=1 << 16)
+def parse_version(raw: str) -> Version | None:
+    """Parse a version string, or ``None`` if it is not valid PEP 440.
+
+    Cached because membership tests run this across every advisory's enumerated
+    version list, and django alone carries 96 advisories.
+    """
+    try:
+        return Version(raw)
+    except InvalidVersion:
+        return None
+
+
+def versions_equal(left: str, right: str) -> bool:
+    """Compare two version strings **semantically**, not lexically.
+
+    Under PEP 440 the release segment is zero-extended for comparison, so
+    ``4.2`` and ``4.2.0`` are the same version. OSV publishes enumerated
+    affected-version lists as *strings*, and PyPI's release keys are strings
+    too, so a naive ``in`` test disagrees with PEP 440 on every version with an
+    omitted trailing zero segment — 694 published versions in this snapshot.
+
+    Unparseable versions fall back to exact string equality, which is the only
+    defensible answer when neither side can be ordered.
+    """
+    parsed_left, parsed_right = parse_version(left), parse_version(right)
+    if parsed_left is None or parsed_right is None:
+        return left == right
+    return parsed_left == parsed_right
+
+
+def version_in(version: str, candidates: Iterable[str]) -> bool:
+    """Semantic membership of ``version`` in ``candidates``.
+
+    ``Version`` hashes consistently with its equality, so this is a set lookup
+    rather than a scan.
+    """
+    target = parse_version(version)
+    if target is None:
+        return version in set(candidates)
+
+    comparable: set[Version] = set()
+    for candidate in candidates:
+        parsed = parse_version(candidate)
+        if parsed is not None:
+            comparable.add(parsed)
+        elif candidate == version:
+            return True
+    return target in comparable
 
 
 def sort_key(version: str) -> tuple[int, Version | str]:
@@ -73,8 +125,13 @@ class PackageMeta(BaseModel):
         return [release.version for release in self.releases]
 
     def release(self, version: str) -> Release | None:
+        """Find a release by version, comparing semantically.
+
+        ``4.2`` and ``4.2.0`` are the same version under PEP 440, so a string
+        match here would report a published release as nonexistent.
+        """
         for candidate in self.releases:
-            if candidate.version == version:
+            if versions_equal(candidate.version, version):
                 return candidate
         return None
 

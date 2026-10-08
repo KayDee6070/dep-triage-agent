@@ -162,23 +162,35 @@ which tools are necessary. No hand-labelling, and no opinion involved.
 
 ### 3.6 Three negatives, not one
 
-A finding from the built fixture, not from the plan. Version-string format
-varies by package: 694 published versions are shaped `X.Y`, 10762 are `X.Y.Z`.
-So `django==4.2` exists and carries 96 advisories while `django==4.2.0` never
-shipped; `flask==2.0.0` exists and is affected while `flask==2.0` does not.
-
-`lookup_vulnerabilities` therefore distinguishes:
+`lookup_vulnerabilities` distinguishes three outcomes that all report
+`vulnerable=false`:
 
 | Outcome | Meaning | Correct answer |
 |---|---|---|
 | `package_unknown` | no data held | "unknown" |
-| `version_unknown` | package known, version never published | "that version does not exist" |
+| `version_unknown` | package known, version exists in no PEP 440-equal form | "that version does not exist" |
 | `ok`, `vulnerable=false` | published and genuinely clean | "not vulnerable" |
 
 **Advisories are checked before the publication test.** 2175 version strings in
 the snapshot are named by an advisory but no longer listed on the index —
 withdrawn releases and pre-release builds. Testing publication first would
 report every one of them as unknown and hide a real vulnerability.
+
+### 3.7 Version comparison is semantic, not lexical
+
+OSV publishes enumerated affected-version lists as strings and PyPI release
+keys are strings, but PEP 440 zero-extends the release segment:
+`Version("4.2") == Version("4.2.0")` is **True**.
+
+Every comparison therefore goes through `versions_equal` / `version_in`, which
+parse both sides first. 694 published versions in this snapshot are shaped
+`X.Y`, and the original lexical implementation disagreed with PEP 440 on **all
+694** — it would have scored the agent wrong when it was right. A regression
+test asserts `X.Y` and `X.Y.0` agree across all of them.
+
+The enumerated-list property in §3.5 is what removes arguable ground truth from
+this project, but **only if the comparison against those lists is semantic**.
+As raw strings they were a trap, not an asset.
 
 ---
 
@@ -700,6 +712,31 @@ Not "polished". Done when all six hold:
 ---
 
 ## 16. Revision history
+
+### 2026-10-08 — senior engineer review, round 3
+
+One item, and it was a real ground-truth bug rather than a design preference.
+
+Version comparison was **lexical**, not semantic. PEP 440 zero-extends the
+release segment, so `4.2` and `4.2.0` are the same version, but OSV's
+enumerated affected-version lists and PyPI's release keys are both strings. A
+naive `in` test disagreed with PEP 440 on all 694 `X.Y`-shaped published
+versions in the snapshot. `lookup_vulnerabilities` and `check_compatibility`
+were both affected; `list_releases` was already correct because its
+`since_version` filter compared `Version` objects.
+
+Worse than the bug: the round-2 notes and the README presented the
+`django==4.2` / `django==4.2.0` contrast as *evidence* that the ground truth
+was unarguable. It was evidence of the opposite. §3.6 and the README have been
+corrected, and §3.7 added.
+
+Worse still: a test — `test_plausible_but_nonexistent_pin_is_not_called_clean`
+— asserted the buggy behaviour and passed, supplying false confidence. It now
+uses a version with no PEP 440-equal counterpart, and carries a comment saying
+what it used to assert.
+
+Fixed in the fixture layer so all four tools inherit it. `Version` hashes
+consistently with its equality, so membership stayed O(1).
 
 ### 2026-10-08 — senior engineer review, round 2
 

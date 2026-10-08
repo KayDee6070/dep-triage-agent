@@ -309,7 +309,37 @@ def test_advisories_win_over_unpublished_version(tiny_fixture: Fixture) -> None:
 
 
 def test_plausible_but_nonexistent_pin_is_not_called_clean(tiny_fixture: Fixture) -> None:
-    """The django==4.2.0 trap: looks like a version, never shipped."""
-    result = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "1.0")
+    """A version that looks plausible and exists in no form at all.
+
+    This test previously used "1.0" as the nonexistent version and passed,
+    which locked in a bug: 1.0 and 1.0.0 are the same version under PEP 440,
+    so "1.0" does exist. A passing test was supplying false confidence. The
+    probe now uses a version with no PEP 440-equal counterpart in the fixture.
+    """
+    result = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "1.5.2")
     assert result.status == "version_unknown"
     assert result.vulnerable is False
+
+
+def test_zero_padded_pin_is_the_same_version(tiny_fixture: Fixture) -> None:
+    """Regression: PEP 440 zero-extends, so 1.0 and 1.0.0 must agree."""
+    bare = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "1.0")
+    padded = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "1.0.0")
+    assert bare.status == padded.status == "ok"
+    assert bare.vulnerable is padded.vulnerable is True
+    assert [a.id for a in bare.advisories] == [a.id for a in padded.advisories]
+
+
+def test_version_unknown_still_fires_for_a_genuinely_absent_version(
+    tiny_fixture: Fixture,
+) -> None:
+    """The fix must not swallow the real case: 9.9.9 does not exist in any form."""
+    result = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "9.9.9")
+    assert result.status == "version_unknown"
+    assert result.vulnerable is False
+
+
+def test_compatibility_accepts_a_zero_padded_version(tiny_fixture: Fixture) -> None:
+    result = triage.check_compatibility(tiny_fixture, "demo-pkg", "1.0", "3.8")
+    assert result.status == "ok"
+    assert result.python_compatible is True

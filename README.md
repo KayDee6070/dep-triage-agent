@@ -88,33 +88,40 @@ the right arguments, which is closer to how agents actually fail.
 
 ### Three negatives, not one
 
-A finding from the built data, not from the plan. Version-string format varies
-by package — 694 published versions are shaped `X.Y`, 10762 are `X.Y.Z`:
-
-| Pin | Reality |
-|---|---|
-| `django==4.2` | exists, **96 advisories** |
-| `django==4.2.0` | never shipped |
-| `flask==2.0.0` | exists, 4 advisories |
-| `flask==2.0` | never shipped |
-
-So `lookup_vulnerabilities` distinguishes:
+`lookup_vulnerabilities` distinguishes three outcomes that all report
+`vulnerable=false`:
 
 | Outcome | Meaning | Correct answer |
 |---|---|---|
 | `package_unknown` | no data held | "unknown" |
-| `version_unknown` | package known, version never published | "that version does not exist" |
+| `version_unknown` | package known, version exists in no form | "that version does not exist" |
 | `ok`, `vulnerable=false` | published and genuinely clean | "not vulnerable" |
 
-All three report `vulnerable=false` and differ only in `status`, so an agent
-reading one field conflates all three. That is a named, scored failure mode
-(`negative_conflation_rate`), not a rounding error.
+They differ only in `status`, so an agent reading one field conflates all
+three. That is a named, scored failure mode (`negative_conflation_rate`), not a
+rounding error.
 
 **Advisories are checked before the publication test**, and the data decided
 that ordering: 2175 version strings in the snapshot are named by an advisory
 but no longer listed on the index — withdrawn releases and pre-release builds.
 Testing publication first would report every one of them as unknown and hide a
 real vulnerability.
+
+### Version comparison is semantic, not lexical
+
+OSV publishes enumerated affected-version lists as *strings*, and PyPI release
+keys are strings too. But PEP 440 zero-extends the release segment:
+`Version("4.2") == Version("4.2.0")` is **True** — they are the same version.
+
+So every comparison goes through `versions_equal` / `version_in`, which parse
+both sides before comparing. 694 published versions in this snapshot are shaped
+`X.Y`, and a lexical `in` test disagreed with PEP 440 on **all of them** —
+scoring the agent wrong when it was right. A regression test asserts `X.Y` and
+`X.Y.0` produce identical answers across all 694.
+
+This is what makes the enumerated-list design actually remove arguable ground
+truth. The enumerated lists only help if the comparison against them is
+semantic; as strings alone they were a trap.
 
 ### Question classes — 60 tasks
 

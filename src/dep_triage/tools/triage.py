@@ -18,7 +18,7 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
 from pydantic import BaseModel, Field
 
-from dep_triage.fixture import Fixture, normalise, sort_key
+from dep_triage.fixture import Fixture, normalise, sort_key, version_in
 
 #: ``list_releases`` caps its output. Django alone has several hundred releases,
 #: and an 8k context cannot absorb that alongside the rest of a conversation.
@@ -143,7 +143,7 @@ def lookup_vulnerabilities(fixture: Fixture, package: str, version: str) -> Vuln
             fixed_versions=record.fixed_versions(),
         )
         for record in fixture.vulns_for(key)
-        if version in record.affected_versions
+        if version_in(version, record.affected_versions)
     ]
 
     meta = fixture.package(key)

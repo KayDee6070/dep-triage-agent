@@ -163,3 +163,75 @@ def test_real_fixture_advisories_reference_only_their_own_package(real_fixture: 
 def test_real_fixture_every_package_has_releases(real_fixture: Fixture) -> None:
     empty = [name for name, meta in real_fixture.packages.items() if not meta.releases]
     assert not empty, f"packages with no releases: {empty}"
+
+
+# --- PEP 440 semantic comparison (regression) -----------------------------
+#
+# Found in senior review, 2026-10-08. OSV publishes enumerated affected-version
+# lists as strings and PyPI release keys are strings, but PEP 440 zero-extends
+# the release segment: Version("4.2") == Version("4.2.0"). A lexical `in` test
+# therefore disagreed with PEP 440 on all 694 X.Y-shaped published versions in
+# the snapshot, and would have scored the agent wrong when it was right.
+
+
+@pytest.mark.parametrize(
+    ("left", "right", "equal"),
+    [
+        ("4.2", "4.2.0", True),
+        ("4.2", "4.2.0.0", True),
+        ("1.0", "1.0.0", True),
+        ("4.2", "4.2.1", False),
+        ("4.2", "4.2rc1", False),
+        ("1!1.0", "1.0", False),
+        ("not-a-version", "not-a-version", True),
+        ("not-a-version", "4.2", False),
+    ],
+)
+def test_versions_equal_is_semantic(left: str, right: str, equal: bool) -> None:
+    from dep_triage.fixture import versions_equal
+
+    assert versions_equal(left, right) is equal
+    assert versions_equal(right, left) is equal, "comparison must be symmetric"
+
+
+def test_version_in_is_semantic() -> None:
+    from dep_triage.fixture import version_in
+
+    assert version_in("4.2.0", ["4.1", "4.2", "4.3"]) is True
+    assert version_in("4.2", ["4.1", "4.2.0", "4.3"]) is True
+    assert version_in("4.2.1", ["4.1", "4.2", "4.3"]) is False
+    assert version_in("junk", ["junk", "4.2"]) is True
+    assert version_in("junk", ["4.2"]) is False
+    assert version_in("4.2", []) is False
+
+
+def test_release_lookup_is_semantic(tiny_fixture: Fixture) -> None:
+    meta = tiny_fixture.packages["demo-pkg"]
+    assert meta.release("1.0.0") is not None
+    assert meta.release("1.0") is not None, "1.0 and 1.0.0 are the same version"
+    assert meta.release("1.0.0.0") is not None
+    assert meta.release("1.0.1") is None
+
+
+def test_real_fixture_zero_padding_never_changes_the_answer(real_fixture: Fixture) -> None:
+    """The regression itself, on real data: X.Y and X.Y.0 must agree."""
+    import re
+
+    from dep_triage.tools import triage
+
+    pins = [
+        (name, version)
+        for name, meta in real_fixture.packages.items()
+        for version in meta.versions
+        if re.fullmatch(r"\d+\.\d+", version)
+    ]
+    assert len(pins) > 100, "expected many X.Y-shaped versions to exercise this"
+
+    for name, version in pins:
+        bare = triage.lookup_vulnerabilities(real_fixture, name, version)
+        padded = triage.lookup_vulnerabilities(real_fixture, name, version + ".0")
+        assert (bare.status, bare.vulnerable, len(bare.advisories)) == (
+            padded.status,
+            padded.vulnerable,
+            len(padded.advisories),
+        ), f"{name}: {version} and {version}.0 disagree"
