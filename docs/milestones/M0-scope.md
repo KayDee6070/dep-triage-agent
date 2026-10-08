@@ -1,7 +1,9 @@
 # M0 — Scope
 
-**Status:** agreed, 2026-10-07
+**Status:** agreed 2026-10-07 · **revised 2026-10-07** after senior engineer review
 **Rule for this milestone:** decisions only, no code.
+
+Revision history is at §16. Everything below is the current plan.
 
 ---
 
@@ -11,14 +13,19 @@
 |---|---|
 | Task domain | Dependency security triage over a frozen offline snapshot |
 | Tools | 4 (`parse_requirements`, `lookup_vulnerabilities`, `list_releases`, `check_compatibility`) |
+| Task set | 60 tasks, **split 20 dev / 40 held-out, declared before any measurement** |
+| Primary metric | **End-to-end answer accuracy.** The three required metrics are diagnostics that explain it. |
+| Baselines | **`no-agent` (call everything) and `always-lookup`** — measured on the same splits |
 | Agent model | Qwen3-8B Q4_K_M, local, via Ollama |
-| Fallback model | Qwen2.5-7B-Instruct Q4_K_M (decide day 4) |
+| Model switch trigger | **Dev subset under 30% task accuracy at end of M2 → switch to Qwen2.5-7B-Instruct** |
+| Reproducibility | `temperature=0` + fixed seed, **verified day 5**, not day 9 |
 | Budget | **$0.** Open-weight models only. No paid API. |
-| Demo backend | Free hosted open-weight API (Groq free tier), best-effort |
+| Overrun rule | **Shrink the fixture, never the domain.** Cut order at §13. |
+| Demo backend | Free hosted open-weight API (Groq free tier), best-effort, degrades to a notice |
 | Public link | Hugging Face Spaces (Docker SDK) |
-| Cloud evidence | `deploy/azure.sh` committed; running it is optional, card-gated |
+| Cloud evidence | `deploy/azure.sh` committed; running it optional, card-gated |
 | Framework | LangGraph (single agent) + FastAPI |
-| Deadline | 14 days from 2026-10-07 |
+| Deadline | **2026-10-21** — 14 days, day 1 = 2026-10-08 |
 
 ---
 
@@ -27,16 +34,21 @@
 A previous project (GraphRAG Bench) covered LLMs, RAG, embeddings, vector
 search, local model serving, and evaluation. It covered nothing about Docker,
 deployment, monitoring, agents, or cloud — which nearly every German job ad in
-the target set asks for. This project exists to close exactly that gap, and
-nothing else.
+the target set asks for. This project exists to close exactly that gap.
 
 **The thesis:** everyone has an agent demo. Almost nobody can say how well
-theirs performs. The eval harness is the differentiator; the agent is the
-entry ticket.
+theirs performs. The eval harness is the differentiator; the agent is the entry
+ticket.
 
-Direct consequence: the agent is deliberately *not* optimised. If it evaluates
-badly, that is the result and it gets published. No tuning against the eval
-set.
+Two direct consequences:
+
+1. The agent is deliberately **not optimised against the eval**. If it
+   evaluates badly, that is the result and it gets published.
+2. **"Call every tool beats the agent" is a legitimate headline.** The previous
+   project's strongest result was that the dumb baseline (BM25) beat the
+   sophisticated methods. The same shape of finding here would mean agentic
+   routing doesn't earn its place in this domain — which is a publishable
+   measurement, not a failed project. §5 exists to make that finding possible.
 
 ---
 
@@ -44,9 +56,9 @@ set.
 
 ### 3.1 Why this domain
 
-The project's hard design constraint is **outcomes checkable against ground
-truth**. If success can't be verified, it can't be evaluated, and the
-differentiator collapses.
+The binding design constraint is **outcomes checkable against ground truth**.
+If success can't be verified, it can't be evaluated, and the differentiator
+collapses.
 
 This domain satisfies it exactly: every answer is a version string, a boolean,
 a set of package names, or a set of CVE IDs — all comparable by equality
@@ -56,7 +68,7 @@ against a reference answer computed from the same data.
 
 A **frozen offline snapshot**, committed to the repository:
 
-- PyPI release metadata for ~80 curated packages
+- PyPI release metadata for the curated package set
 - OSV.dev vulnerability records for those packages
 
 Frozen, not live. Three reasons:
@@ -66,8 +78,11 @@ Frozen, not live. Three reasons:
    upstream at runtime.
 3. **Ground truth is stable.** Live data would silently invalidate answers.
 
-The snapshot going stale is expected and documented. It is a benchmark
-fixture, not a security product.
+The snapshot going stale is expected and documented. It is a benchmark fixture,
+not a security product.
+
+**Target size ~80 packages. Floor 20 packages.** See §12 — if the fixture is
+slow, the corpus shrinks and the design survives.
 
 ### 3.3 The four tools
 
@@ -81,31 +96,43 @@ fixture, not a security product.
 The tools are deliberately **non-substitutable**. Each question class needs a
 different subset, so tool-selection accuracy measures something real rather
 than being a formality. This was the deciding factor against the rejected SQL
-domain (§6.2), where ~90% of tasks route to a single tool.
+domain (§8.2), where ~90% of tasks route to a single tool.
 
-### 3.4 Question classes and the 60-task set
+**Tool 4 stays even though only 10 of 60 tasks need it.** It is the only tool
+producing a genuine multi-hop dependency between calls, and multi-hop is where
+agents fail and where the interesting findings live. It is second on the cut
+list (§13), not first.
 
-| Class | n | Required tools | Answer type |
-|---|---|---|---|
-| Is `pkg==X` vulnerable? | 12 | 2 | bool + CVE set |
-| Minimum safe version? | 12 | 2, 3 | version string |
-| Which packages in this file are vulnerable? | 12 | 1, 2 | set of names |
-| Can I upgrade on Python `N`? | 10 | 2, 3, 4 | bool + reason |
-| Unknown package — **abstention probe** | 8 | 2 | must answer "unknown" |
-| Direct CVE lookup — **over-call probe** | 6 | 2 | affected ranges |
-| **Total** | **60** | | |
+### 3.4 Question classes and the split
+
+**The split is declared now, before any measurement exists.** Iterate freely on
+the dev 20. The held-out 40 is touched **once**, on day 13, and that is the
+reported result.
+
+| Class | Total | Dev | Held-out | Required tools | Answer type |
+|---|---|---|---|---|---|
+| Is `pkg==X` vulnerable? | 12 | 4 | 8 | 2 | bool + CVE set |
+| Minimum safe version? | 12 | 4 | 8 | 2, 3 | version string |
+| Which packages in this file are vulnerable? | 12 | 4 | 8 | 1, 2 | set of names |
+| Can I upgrade on Python `N`? | 10 | 3 | 7 | 2, 3, 4 | bool + reason |
+| Unknown package — **abstention probe** | 8 | 3 | 5 | 2 | must answer "unknown" |
+| Direct CVE lookup — **over-call probe** | 6 | 2 | 4 | 2 | affected ranges |
+| **Total** | **60** | **20** | **40** | | |
+
+Both halves cover all six classes, so the dev subset is representative and the
+held-out set isn't measuring something the dev set never saw.
 
 Two probe classes earn their place:
 
 - **Abstention probe.** The package is absent from the snapshot. The only
   correct answer is "I don't know." Anything specific is a fabrication, and we
-  know it is, because we know what the tool returned.
+  know it is, because we own the fixture.
 - **Over-call probe.** The question needs exactly one tool and no parsing. An
   agent that calls `parse_requirements` here is over-calling, which feeds
-  metric 3.
+  metric D3.
 
 "Minimum safe version" requires tools 2 **and** 3 because the fix version must
-be one that actually exists on PyPI. An agent that answers from the OSV record
+be one that actually exists on PyPI. An agent answering from the OSV record
 alone will name versions that were never released — a specific, checkable
 failure mode.
 
@@ -113,28 +140,46 @@ failure mode.
 
 Computed once by a reference script reading the same frozen snapshot, stored
 alongside each task. Scoring is exact comparison (string, bool, or set
-equality). No LLM judge — see §7.3.
+equality). No LLM judge — see §10.2.
+
+**The reference script also derives the minimal necessary tool set, for free.**
+Whichever fixture tables the script had to read to produce the answer determine
+which tools are necessary. No hand-labelling, and no opinion involved.
 
 ---
 
-## 4. The three metrics
+## 4. Metrics
 
-Defined precisely here so M3 has nothing left to interpret.
+### 4.1 Primary metric
 
-### 4.1 Tool-selection accuracy
+**`task_accuracy`** — fraction of tasks whose final answer exactly matches
+ground truth.
 
-| Metric | Definition |
-|---|---|
-| `exact_set_match` | fraction of tasks where {tools called} == {tools required} |
-| `tool_precision` | \|called ∩ required\| / \|called\| |
-| `tool_recall` | \|called ∩ required\| / \|required\| |
-| `first_call_accuracy` | fraction where the first tool called is the expected one (tasks with a determinate first tool only) |
-| `no_tool_discipline` | on tasks needing no tool, fraction where zero tools were called |
+This is the headline. The three metrics below are **diagnostics that explain
+it**, not peers of it. 90% tool selection with 40% task accuracy is a
+fascinating finding; without the denominator it is noise.
 
-### 4.2 Failure recovery
+Reported for: the agent, and both baselines (§5), on the same splits.
 
-Measured on fault-injected runs. Three injected fault modes, applied at the
-tool-wrapper layer:
+### 4.2 D1 — tool selection
+
+Scored against the **minimal necessary** set derived in §3.5.
+
+| Metric | Definition | Status |
+|---|---|---|
+| `tool_recall` | \|called ∩ necessary\| / \|necessary\| | **Hard requirement.** Below 1.0 means the agent answered without the information it needed — it guessed. |
+| `tool_precision` | \|called ∩ necessary\| / \|called\| | **Soft.** Extra calls are waste, not error. |
+| `first_call_accuracy` | fraction where the first tool called is the expected one (determinate tasks only) | Reported |
+| `no_tool_discipline` | on tasks needing no tool, fraction calling zero tools | Reported |
+
+`exact_set_match` is **demoted to a footnote**, labelled "perfect-routing rate
+— reported for interest, not a quality measure." It assumes a single valid tool
+path per task and penalises correct-but-different routes. Over-calling is
+already scored in D3; penalising it here too would double-count it.
+
+### 4.3 D2 — failure recovery
+
+Faults injected at the tool-wrapper layer:
 
 - `error` — tool returns HTTP 503
 - `empty` — tool returns a valid but empty result
@@ -143,135 +188,229 @@ tool-wrapper layer:
 | Metric | Definition |
 |---|---|
 | `recovery_rate` | fraction reaching the correct final answer despite the fault |
-| `fabrication_rate` | fraction asserting a specific version or CVE ID the tool never returned |
+| `fabrication_rate` | see §4.5 |
 | `graceful_abstention_rate` | where recovery was impossible, fraction that said so instead of answering |
 | behaviour class | one of `retried_same_tool`, `switched_tool`, `abstained`, `fabricated`, `crashed` |
 
-`fabrication_rate` is the metric this project exists to report. It is almost
-never measured, and it is only checkable because the harness knows exactly what
-each tool returned.
-
-### 4.3 Stopping behaviour
+### 4.4 D3 — stopping behaviour
 
 | Metric | Definition |
 |---|---|
 | `termination_rate` | fraction finishing within `max_steps` (8) |
-| `over_call_ratio` | mean of actual tool calls ÷ oracle tool calls |
+| `over_call_ratio` | mean of actual tool calls ÷ necessary tool calls |
 | `repeat_call_rate` | fraction of tasks with ≥1 identical `(tool, args)` call repeated |
-| `steps_to_answer` | distribution, compared against the oracle step count |
+| `steps_to_answer` | distribution, compared against the reference step count |
 
-### 4.4 Suite sizes and run times
+### 4.5 Fabrication detection
 
-| Suite | Size | Wall time |
-|---|---|---|
-| Fast subset (iteration only) | 15 tasks | ~6 min |
-| Full set (reported numbers only) | 60 tasks | ~20–30 min |
-| Fault suite | 30 tasks × 3 modes = 90 runs | ~45 min |
+**Checked against the whole frozen fixture, not against what one call
+returned.** We own the fixture and it is complete, so a version string or
+vulnerability ID either exists in it or it does not.
+
+Extract every version string and CVE/GHSA ID from the agent's final answer,
+then:
+
+| Counter | Definition |
+|---|---|
+| `fabrication_hard` | the token appears **nowhere** in the fixture → invented outright |
+| `fabrication_misattributed` | the token exists in the fixture but not for the package under discussion → wrong attribution |
+
+**`fabrication_rate` is reported explicitly as a lower bound.** An agent that
+implies a version without naming it is undetectable by this method. The report
+states that limitation rather than letting the number read as complete.
+
+This is the metric the project exists to publish. It is also the most fragile
+one, which is why it carries its own caveat in the report.
+
+### 4.6 Suite sizes and wall times
+
+Planning number: ~25 s/task on Qwen3-8B at ~35–50 tok/s.
+
+| Suite | Size | Wall time | When |
+|---|---|---|---|
+| **Dev** | 20 tasks | ~8–10 min | freely, all of M4 |
+| **Dev fault suite** | 10 × 3 modes = 30 runs | ~13 min | freely |
+| **Held-out** | 40 tasks | ~17–20 min | **once, day 13** |
+| **Held-out fault suite** | 20 × 3 modes = 60 runs | ~25 min | **once, day 13** |
+| `no-agent` baseline | 40 tasks | ~7 min | once, day 13 |
+| `always-lookup` baseline | 40 tasks | ~8 min | once, day 13 |
+| **Final held-out run, total** | **~180 executions** | **~60 min** | **one shot** |
+
+The final run is a single ~1 h job. Everything in it is touched once.
 
 ---
 
-## 5. Model: Qwen3-8B, local
+## 5. Baselines
+
+Without these, "the agent scored 70%" is unanswerable — 70% against what?
+Both are cheap, deterministic, and measured on the same splits as the agent.
+
+### 5.1 `no-agent` — call everything
+
+A fixed script, no routing decision by the model:
+
+1. Run `parse_requirements` on any requirements-like text in the question;
+   otherwise regex-extract the package name.
+2. For every package found, call tools 2, 3, and 4.
+3. Concatenate all results into one prompt. **One** LLM call. Answer.
+
+This is tool *use* without tool *selection*. It is the control that asks
+whether agentic routing earns its place at all.
+
+### 5.2 `always-lookup` — one tool, always
+
+Call `lookup_vulnerabilities` on the regex-extracted package(s). Nothing else.
+One LLM call.
+
+Expected to fail the "minimum safe version" class (needs real releases) and the
+Python-compatibility class. That is the point: it establishes a floor and shows
+which question classes genuinely need routing.
+
+### 5.3 What the comparison means
+
+| Outcome | Reading |
+|---|---|
+| Agent > `no-agent` | routing earns its place; report the margin |
+| Agent ≈ `no-agent` | routing costs tokens and latency for nothing — **publish that** |
+| Agent < `no-agent` | routing actively hurts; the most interesting result available |
+| `always-lookup` ≈ agent | the task set is too easy; say so |
+
+**Baselines are never cut.** See §13.
+
+---
+
+## 6. Reproducibility — verified day 5
+
+`temperature=0` and a fixed seed, then **run the dev subset twice at end of M2
+and confirm the metrics are byte-identical.**
+
+Checked on day 5, not day 9, because it is cheap now and expensive later.
+
+**If it fails** — Ollama determinism is not guaranteed across batching and GPU
+scheduling even at `temperature=0` — the fallback is 3 repeats with variance
+reported on every metric, and the report says `repeatable: False` with the
+observed spread. That is a worse result, not a blocker, and it has to be known
+before M3 builds the harness around a single-run assumption.
+
+---
+
+## 7. Model: Qwen3-8B, local
 
 **Chosen:** Qwen3-8B Q4_K_M (~5.0 GB) served by Ollama on an RTX 4070 Laptop
-(8188 MiB). With an 8k context the KV cache adds ~0.5 GB, total ~5.5 GB against
-~7.2 GB usable. Fits.
+(8188 MiB). An 8k context adds ~0.5 GB KV cache, total ~5.5 GB against ~7.2 GB
+usable. Fits.
 
-**Fallback:** Qwen2.5-7B-Instruct Q4_K_M (~4.7 GB) if Qwen3 tool-call parsing
-proves awkward under Ollama. Decided on day 4, not now.
+**Fallback:** Qwen2.5-7B-Instruct Q4_K_M (~4.7 GB) — older, but its Ollama
+tool-calling path is very well trodden.
 
-### 5.1 Why local, and why a small model
+### 7.1 Switch trigger — declared before seeing any number
+
+> **If the dev subset scores under 30% `task_accuracy` at end of M2, switch to
+> Qwen2.5-7B-Instruct.**
+
+A threshold set in advance is the difference between a decision and a
+rationalisation.
+
+### 7.2 Why local, and why a small model
 
 1. **Budget is $0.** This is the binding constraint and it forecloses every
    paid API.
 2. **A weak model produces a usable failure distribution.** A frontier model
-   would score ~95% and the harness would have nothing to report. An
-   instrument that only outputs "it works" is a weak artifact. This is a
-   feature of the choice, not a consolation.
-3. **Fully offline and reproducible** — the same discipline as the previous
-   project. No key, no quota, no rate limit, no drift.
+   would score ~95% and the harness would have nothing to report. An instrument
+   that only outputs "it works" is a weak artifact. This is a property of the
+   choice, not a consolation.
+3. **Fully offline and reproducible** — no key, no quota, no rate limit, no
+   silent model drift.
 
-### 5.2 What this costs
+### 7.3 What this costs
 
-Not money — **time**. At ~35–50 tok/s, a full 60-task run takes 20–30 minutes
-against ~90 seconds for a hosted API. That caps iteration at roughly 6–8 full
-runs per day and is why the fast subset in §4.4 exists.
+Not money — **time.** A full 60-task run is 20–30 min against ~90 s on a hosted
+API. That caps iteration at ~6–8 full runs per day, which is why the dev subset
+in §4.6 exists.
 
-### 5.3 Rejected
+**Residual risk:** the model may be too weak to produce *any* successful
+trajectories, and an all-failures result is as uninformative as an all-passes
+one. The §7.1 trigger and the hosted-model comparison column (§9.3) are the
+partial cover. It remains a real risk.
+
+### 7.4 Rejected
 
 | Option | Why not |
 |---|---|
 | Claude Haiku 4.5 | ~$66 for the project. Budget is $0. |
-| Any frontier model | Cost, plus it would flatten the eval result (§5.1) |
-| Qwen3-4B | Fits easily but too weak to produce an interesting agent at all |
-| Qwen3-1.7B | Only considered for CPU deployment; see §7.2 |
+| Any frontier model | Cost, plus it would flatten the result (§7.2) |
+| Qwen3-4B | Fits easily, too weak to produce an interesting agent |
+| Qwen3-1.7B | Only considered for CPU deployment; see §9.2 |
 
 ---
 
-## 6. Rejected domains
+## 8. Rejected domains
 
-### 6.1 Incident triage over synthetic telemetry
+### 8.1 Incident triage over synthetic telemetry
 
 Tools would be `search_logs`, `query_metric`, `get_service_graph`,
-`get_deploy_history`; ground truth perfect by construction, since the root
-cause is injected.
+`get_deploy_history`; ground truth perfect by construction.
 
 **Rejected on cost.** A telemetry generator is a full day of a 14-day budget,
 spent before any agent exists. Secondary objection: the data is admittedly
-synthetic, which is answerable but is still an objection the chosen domain
-doesn't have to field.
+synthetic.
 
-### 6.2 SQL data analyst over a fixed SQLite database
+### 8.2 SQL data analyst over a fixed SQLite database
 
 Tools `get_schema`, `run_sql`, `compute`, `lookup_glossary`; ground truth is a
-reference SQL query per question. Fastest to build (~2 h on a public dataset)
-and verification is bulletproof.
+reference SQL query per question. Fastest to build (~2 h) and verification is
+bulletproof.
 
-**Rejected because it breaks metric 1.** Roughly 90% of tasks route to
-`run_sql`, so tool-selection accuracy would be near-constant and would measure
-nothing. It is also the single most common agent demo in existence.
+**Rejected because it breaks D1.** Roughly 90% of tasks route to `run_sql`, so
+tool-selection accuracy would be near-constant and would measure nothing. It is
+also the most common agent demo in existence.
 
-**Retained as the fallback.** If the frozen fixture is not finished by end of
-day 3, the project switches to this domain. That trigger is a hard date, not a
-judgement call.
+**It is not the overrun fallback.** An earlier draft of this document listed
+SQL as the day-3 fallback while simultaneously documenting that SQL destroys
+D1 — a contradiction. Switching to it would trade a late project for a
+pointless one. See §12 for the actual rule.
 
 ---
 
-## 7. Deployment
+## 9. Deployment
 
-### 7.1 The constraint
+### 9.1 The constraint
 
-The stated requirement is that the link still works in six months. A dead demo
-link is worse than no link. That ranks survivability above every other
-property.
+The link must still work in six months. A dead demo link is worse than no link.
+That ranks survivability above every other property.
 
-### 7.2 The GPU problem
+### 9.2 The GPU problem
 
 HF Spaces free tier is 2 vCPU / 16 GB RAM / **no GPU**. Qwen3-8B cannot run
 there, so the deployed agent cannot be the evaluated agent.
 
-The fully self-contained alternative was measured rather than assumed: Qwen3-1.7B
-Q4 on 2 cores runs ~6–10 tok/s generation with slow prompt processing — roughly
-65 s per agent call, **5+ minutes per query** — and tool-calling at 1.7B is
-poor. Immortal, but a demo that visibly fails. Rejected.
+The fully self-contained alternative was measured rather than assumed:
+Qwen3-1.7B Q4 on 2 cores runs ~6–10 tok/s generation with slow prompt
+processing — roughly 65 s per agent call, **5+ minutes per query** — and
+tool-calling at 1.7B is poor. Immortal, but a demo that visibly fails.
+Rejected.
 
-### 7.3 The resolution
+### 9.3 The resolution
 
 The Space serves three things, in descending order of durability:
 
 1. **Landing page: the generated eval report.** Static HTML emitted by the
    harness. Zero runtime dependencies. Cannot break.
 2. **Live `/ask` form**, backed by a free hosted open-weight model (Groq free
-   tier — no card; terms to be verified at signup). Best-effort. If that tier
-   changes or disappears, the form degrades to a notice and the report still
-   loads.
+   tier — no card; terms verified at signup). Best-effort.
 3. `/health`, `/metrics`, `/docs`.
 
-**The demo model is also evaluated.** The report carries two columns —
-Qwen3-8B local and the hosted model — so nothing on the public link is an
-unmeasured claim. This is close to free: Ollama and Groq are both
-OpenAI-compatible, so it is two config profiles, not two code paths.
+**Graceful degradation is a requirement, not a nicety.** When the hosted path
+is unreachable the form renders *"Live agent temporarily unavailable — the full
+evaluation report is below"* and the report still loads. A demo that says that
+reads as competent; one that throws a stack trace reads as broken.
 
-### 7.4 Rejected hosts
+**The demo model is also evaluated.** The report carries two columns — Qwen3-8B
+local and the hosted model — so nothing on the public link is an unmeasured
+claim. Close to free: Ollama and Groq are both OpenAI-compatible, so it is two
+config profiles, not two code paths.
+
+### 9.4 Rejected hosts
 
 | Host | Why not |
 |---|---|
@@ -282,41 +421,49 @@ OpenAI-compatible, so it is two config profiles, not two code paths.
 
 **Azure as evidence, not as hosting.** `deploy/azure.sh` is committed and
 documented. Running it is optional and card-gated, decided at M6. An unrun
-script is weak evidence and the README will say so rather than imply otherwise.
+script is weak evidence and the README says so rather than implying otherwise.
 
 ---
 
-## 8. Stack
+## 10. Stack
 
 | Layer | Choice | Reason |
 |---|---|---|
 | Agent | LangGraph, single agent, `create_react_agent` | ~40 lines, stable API, named in target job ads |
 | Instrumentation | **tool-wrapper layer, not inside the graph** | the harness must never depend on LangGraph internals |
-| Service | FastAPI — `POST /ask`, `GET /health`, `GET /metrics` | named in target job ads; needed for deploy |
+| Service | FastAPI — `POST /ask`, `/health`, `/metrics` | named in target job ads; needed for deploy |
 | Deps | `uv` | fast, reproducible, CI-friendly |
 | Quality | pytest, ruff, mypy (light), GitHub Actions | |
-| Observability | structlog JSON logs + `prometheus-client` | |
+| Observability | structlog JSON + `prometheus-client` | Prometheus is first on the cut list (§13) |
 
-### 8.1 CI runs no model
+**LangGraph is in the plan for job-ad reasons, which is a career argument and
+not an engineering one.** A hand-rolled loop would be clearer with no version
+churn. The accepted obligation: during M2, walk through exactly what loop
+`create_react_agent` generates — the state graph, the tool-call node, the
+condition that routes back, and where the step limit is enforced — and record
+it in the M2 report. The risk here is not technical, it is being unable to
+answer "what does that actually do" in an interview.
 
-No GPU on free runners, and pulling 5 GB per run is absurd. Instead: real
-Qwen3 responses are recorded once into committed JSON fixtures, and CI replays
-them — lint, mypy, unit tests, and a full agent-loop test, all deterministic. A
+### 10.1 CI runs no model
+
+No GPU on free runners, and pulling 5 GB per run is absurd. Real Qwen3
+responses are recorded once into committed JSON fixtures; CI replays them —
+lint, mypy, unit tests, and a full agent-loop test, all deterministic. A
 `--live` flag runs the same tests against real Ollama, locally only.
 
-Clone-to-green stays under a minute and costs nothing. This is sound practice
-independent of budget, not a compromise forced by it.
+Clone-to-green stays under 60 s and costs nothing. Sound practice independent
+of budget, not a compromise forced by it.
 
-### 8.2 Deterministic evaluators, no LLM judge
+### 10.2 Deterministic evaluators, no LLM judge
 
-Ground truth is exact, so an LLM judge would add variance and cost for no gain.
+Ground truth is exact, so a judge would add variance and cost for no gain.
 Target ads name "LLM-as-judge, deterministic evaluators" — the defensible
 answer is that the domain was *designed* to have exact ground truth, which
 makes deterministic evaluators correct here rather than merely cheaper.
 
 ---
 
-## 9. Scope boundary
+## 11. Scope boundary
 
 Written down in advance so it can be pointed at when pressure arrives,
 including pressure from the repository owner.
@@ -327,48 +474,112 @@ including pressure from the repository owner.
 - Multi-agent, supervisor, or orchestration patterns
 - Vector DB or RAG (already proven in the previous project)
 - Any web UI beyond the static report and one form
-- Grafana, unless M6 finishes a day early
+- Grafana
 - Kubernetes, Terraform
 - Fine-tuning
-- **Prompt tuning against the eval set**
+- **Prompt tuning against the held-out 40**
 
 ---
 
-## 10. Risks
+## 12. Risks and triggers
 
-| Risk | Mitigation |
+| Risk | Trigger / mitigation |
 |---|---|
-| Fixture build overruns | **Hard cap end of day 3**, then switch to domain B (§6.2) |
-| Qwen3 tool-call parsing fights Ollama | Fall back to Qwen2.5-7B-Instruct; decided day 4 |
-| 20–30 min eval runs slow M4 to a crawl | Fast 15-task subset for all iteration; full set only for reported numbers |
-| Groq free tier changes or disappears | Report is static and primary; live form degrades to a notice |
-| Docker not yet installed on the dev machine | **Day 1 task**, not day 10 |
-| Scope growth | §9, enforced |
+| Fixture build overruns | **Shrink the fixture, not the domain.** Floor is 20 packages, which still supports all six task classes. The eval design survives; only the corpus shrinks. |
+| Qwen3 tool-call parsing fights Ollama | Fall back to Qwen2.5-7B-Instruct |
+| Model too weak to produce signal | §7.1 trigger: <30% dev `task_accuracy` at end of M2 → switch |
+| Runs non-deterministic | §6: detected day 5 → 3 repeats + variance reporting |
+| 20–30 min runs slow M4 | Dev subset (20 tasks, ~9 min) for all iteration |
+| Groq free tier changes or disappears | Report is static and primary; form degrades to a notice (§9.3) |
+| Docker not yet installed | **Day 1 task**, not day 10 |
+| Fabrication detector unvalidated | Reported as a lower bound with the limitation stated (§4.5) |
+| M3 underestimated | **Budgeted at 3 days, not 2** — curating unambiguous tasks is slower than it looks |
+| Scope growth | §11, enforced |
 
 ---
 
-## 11. Timeline
+## 13. Cut order, if the project overruns
 
-| Days | Milestone |
-|---|---|
-| 1 | M0 sign-off · install Docker · install Ollama · pull Qwen3-8B · M1 repo hygiene, CI green |
-| 2–3 | Frozen fixture + 4 tools — **hard cap, see §10** |
-| 4–5 | M2 agent working locally |
-| 6–7 | M3 eval harness + 60 tasks with ground truth |
-| 8–9 | M4 measure, diagnose, fix what's worth fixing, re-measure |
-| 10 | M5 Dockerise |
-| 11 | M6 deploy + monitoring |
-| 12–13 | M7 docs, `scripts/study_*.py`, CONTRIBUTIONS.md |
-| 14 | Buffer |
+Decided now so it isn't decided under pressure.
+
+1. **Prometheus / `/metrics`.** Monitoring on HF Spaces is decorative — nothing
+   scrapes it. Keep structlog JSON logging, drop the metrics endpoint.
+2. **The 4th tool** (`check_compatibility`), if M2 runs long. Costs the
+   multi-hop question class.
+3. **60 tasks → 40** (13 dev / 27 held-out), preserving all six classes.
+
+**Never cut:**
+
+- The **held-out split** (§3.4)
+- The **baselines** (§5)
+
+Those two are the differentiator. Everything else is replaceable.
+
+**The buffer is this list, not a spare day.** The timeline below has none.
 
 ---
 
-## 12. Definition of done for the project
+## 14. Timeline
 
-Not "polished". Done when all five hold:
+Day 1 is **2026-10-08**. Deadline **2026-10-21**.
+
+| Day | Date | Work |
+|---|---|---|
+| 1 | Wed 08 Oct | Install Docker + Ollama · pull Qwen3-8B · M1 repo hygiene, CI green |
+| 2–3 | Thu 09 – Fri 10 | Frozen fixture + 4 tools — shrink the corpus if slow (§12) |
+| 4–5 | Sat 11 – Sun 12 | M2 agent working locally · **day 5 gates: reproducibility check (§6) + model-switch decision (§7.1) + `create_react_agent` walkthrough (§10)** |
+| 6–8 | Mon 13 – Wed 15 | M3 harness · 60 tasks with ground truth · split declared · both baselines |
+| 9–10 | Thu 16 – Fri 17 | M4 measure on **dev 20 only** · diagnose · fix · re-measure on dev |
+| 11 | Sat 18 Oct | M5 Dockerise |
+| 12 | Sun 19 Oct | M6 deploy + monitoring, report built from dev numbers |
+| 13 | Mon 20 Oct | **Held-out run — one shot, ~60 min (§4.6)** · regenerate report · redeploy |
+| 14 | Tue 21 Oct | M7 docs · `scripts/study_*.py` · README · CONTRIBUTIONS.md |
+
+Deploy comes before the held-out run deliberately: by day 13 the deploy
+pipeline is already proven, so publishing the final numbers is a rebuild and a
+push, not a first attempt.
+
+No buffer day. If day 13 slips, §13 activates.
+
+---
+
+## 15. Definition of done for the project
+
+Not "polished". Done when all six hold:
 
 1. The public link works.
 2. The agent runs in Docker from a clean checkout.
-3. The eval harness produces a measured result — good or bad.
+3. The harness produces a measured result on the **held-out 40** — good or bad
+   — alongside both baselines.
 4. A study script explains it, with every claim backed by an assertion.
 5. Every milestone ended green: tests pass, linter clean, committed.
+6. The held-out set was measured **once**.
+
+---
+
+## 16. Revision history
+
+### 2026-10-07 — senior engineer review
+
+Twelve items applied. Three were structural and could not have been retrofitted
+later:
+
+| # | Change | Where |
+|---|---|---|
+| 1 | **Held-out split added** — 20 dev / 40 held-out, declared before measurement. Without it, M4's "fix and re-measure" would have produced a fitted number reported as clean. | §3.4, §4.6, §15 |
+| 2 | **Baselines added** — `no-agent` and `always-lookup`. The eval previously compared against nothing, making any score uninterpretable. | §5 |
+| 3 | **Day-3 fallback corrected** — shrink the fixture, not switch domains. The old rule contradicted §8.2 in the same document. | §12 |
+
+Nine refinements:
+
+| # | Change | Where |
+|---|---|---|
+| 4 | Metric hierarchy restructured — `task_accuracy` is primary, the three required metrics are diagnostics | §4.1 |
+| 5 | `exact_set_match` demoted to a footnote; recall hard, precision soft, against a minimal necessary set derived mechanically | §4.2, §3.5 |
+| 6 | Fabrication checked against the whole fixture, and reported as a lower bound | §4.5 |
+| 7 | Model switch given an advance threshold | §7.1 |
+| 8 | Reproducibility verified day 5 | §6 |
+| 9 | `create_react_agent` walkthrough required in M2 | §10 |
+| 10 | Cut order fixed in advance; M3 rebudgeted 2 → 3 days | §13, §14 |
+| 11 | 4th tool retained — the only multi-hop path | §3.3 |
+| 12 | Live demo graceful degradation made a requirement | §9.3 |
