@@ -78,3 +78,45 @@ demo.
 - **My correction to AI output.** The initial recommendation was Claude Haiku
   4.5 with a $100 ceiling. I have no budget, so I rejected it and required
   open-weight models throughout. The plan was reworked around a local Qwen3-8B.
+
+---
+
+## M1 — Repo hygiene
+
+Full report: [`docs/milestones/M1-report.md`](docs/milestones/M1-report.md).
+
+### My decisions
+
+| Decision | Choice |
+|---|---|
+| Definition of done for M1 | The seven criteria in the M1 report, set before any code was written |
+| Milestone ordering | M1 before the sudo installs, because neither Docker nor Ollama blocks repo hygiene |
+
+### AI-assisted
+
+- Package layout, `pyproject.toml`, ruff/mypy/pytest configuration, CI
+  workflow, `.gitignore`, `.env.example`, LICENSE.
+- The config layer (`src/dep_triage/config.py`) and the CLI.
+- All 27 tests.
+- Measured clone-to-green against a real clean clone with a cold `uv` cache
+  (10 s) rather than timing the working tree, and ran a secret scan before the
+  first commit.
+
+### Errors found and corrected
+
+- **A test caught a real bug in the config layer.**
+  `test_unknown_env_var_is_rejected` asserted that a mistyped
+  `DEP_TRIAGE_MAX_STEP` would fail loudly. It did not: `extra="forbid"` does
+  not apply to environment variables, because pydantic-settings only looks up
+  variables it already has fields for. In a deployed container that means a
+  setting you believe you configured having no effect, with nothing in the
+  logs. Fixed with a validator that scans `os.environ` and raises on unknown
+  `DEP_TRIAGE_*` keys.
+
+### Deviations from the stated plan
+
+- **mypy runs `strict`, where the M1 definition of done said "light".** A
+  deliberate upgrade: strict typing is cheap to adopt across 200 lines and
+  expensive across a grown codebase. Recorded rather than quietly changed.
+- **License set to MIT without confirmation.** Flagged in the M1 report as
+  unconfirmed; one commit to change.
