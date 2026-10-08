@@ -191,6 +191,12 @@ tasks per mode, roughly **±22pp**. Concretely: a 5pp gap between the agent and
 sample size" rather than dress it up. Only gaps above ~20pp are reportable
 here.
 
+More tasks is not the fix. Doubling the held-out set to 80 tightens the
+interval only to ~±11pp, and reaching ±10pp needs ~96 tasks — which this time
+budget cannot buy without gutting the harness that is the actual deliverable.
+The correct response is to report intervals and claim only large gaps, which
+is what the harness will do.
+
 **The snapshot goes stale.** This is a benchmark fixture, not a security
 product. Do not use it to audit real dependencies.
 
