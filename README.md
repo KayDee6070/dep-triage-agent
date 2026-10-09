@@ -9,9 +9,9 @@ harness that measures whether it actually works.**
 
 | | |
 |---|---|
-| **State** | **M2 in progress** — fixture, tools and fault injection built and tested. **No agent loop yet. No measured results.** |
-| Day | 1 of 14 (started 2026-10-08, deadline 2026-10-21) |
-| Tests | 102, 0.37 s · ruff clean · mypy `strict` |
+| **State** | **M2 agent working** — runs end to end against local Qwen3-8B. **No eval harness yet. No measured results.** |
+| Day | 2 of 14 (started 2026-10-08, deadline 2026-10-21) |
+| Tests | 135, 2.5 s · ruff clean · mypy `strict` |
 | Clone to green | **18 s** cold cache (budget 60 s) |
 | Fixture | 80 packages, 1487 advisories, snapshot 2026-10-08 |
 | Results | **None.** Measured once on 2026-10-20 — see [Results](#results) |
@@ -129,12 +129,12 @@ semantic; as strings alone they were a trap.
 |---|---|---|---|---|---|
 | Is `pkg==X` vulnerable? — affected | 10 | 3 | 7 | 2 | yes + CVE set |
 | Is `pkg==X` vulnerable? — known, clean | 6 | 2 | 4 | 2 | not vulnerable |
-| Unpublished version — *abstention* | 4 | 2 | 2 | 2 | never shipped |
+| Unpublished version — *abstention* | 6 | 2 | 4 | 2 | never shipped |
 | Unknown package — *abstention* | 6 | 2 | 4 | 2 | unknown |
-| Minimum safe version? | 12 | 4 | 8 | 2, 3 | version string |
-| Which packages in this file are vulnerable? | 10 | 3 | 7 | 1, 2 | set of names |
-| Can I upgrade on Python `N`? | 8 | 3 | 5 | 2, 3, 4 | bool + reason |
-| Direct CVE lookup — *over-call probe* | 4 | 1 | 3 | 2 | affected ranges |
+| Minimum safe version? | 10 | 3 | 7 | 2, 3 | version string |
+| Which packages in this file are vulnerable? | 8 | 3 | 5 | 1, 2 | set of names |
+| Can I upgrade on Python `N`? | 8 | 2 | 6 | 2, 3, 4 | bool + reason |
+| Direct CVE lookup — *over-call probe* | 6 | 3 | 3 | 2 | affected ranges |
 
 "Minimum safe version" needs tools 2 **and** 3, because an advisory's `fixed`
 boundary is not always a version that shipped — answering from the advisory
@@ -343,6 +343,7 @@ RTX 4070 Laptop GPU, 7.4 GiB available to Ollama. Full detail in
 | | Value |
 |---|---|
 | Throughput, warm | **44.9 tok/s** (44.4 / 44.9 / 44.9) |
+| Agent latency per question | **1.4–5 s** with reasoning disabled (120 s timeout with it on) |
 | GPU offload | 37/37 layers, 100% GPU |
 | VRAM at 8k context | 6.2 GB |
 | `temperature=0 seed=42` | identical output across 3 runs |
@@ -356,8 +357,8 @@ three systems.
 
 ## Target interface
 
-*Partly functional. `ask`, `eval` and `report` arrive at M2–M3; stubs that
-raise would make `--help` advertise an interface that does nothing.*
+*`version`, `config` and `ask` work. `eval` and `report` arrive at M3; stubs
+that raise would make `--help` advertise an interface that does nothing.*
 
 ```bash
 uv sync --frozen                         # clone to green, 18s cold
@@ -368,7 +369,8 @@ uv run dep-triage config                 # works — resolved config, secrets re
 
 ollama pull qwen3:8b                     # one-time, 5.2 GB
 
-uv run dep-triage ask "is urllib3==1.26.4 vulnerable?"
+uv run dep-triage ask "is urllib3==1.26.4 vulnerable?"          # works
+uv run dep-triage ask --trace "is django==4.2 vulnerable?"     # works
 uv run dep-triage eval --split dev              # 20 tasks, ~9 min
 uv run dep-triage eval --split held-out         # 40 tasks — run ONCE
 uv run dep-triage eval --baseline no-agent --split dev

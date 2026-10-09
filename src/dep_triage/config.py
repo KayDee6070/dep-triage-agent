@@ -67,6 +67,13 @@ class Settings(BaseSettings):
     llm_seed: int = 42
     llm_timeout_s: int = 120
 
+    #: Qwen3 reasons by default, and it is expensive: ~840 completion tokens to
+    #: answer "17*23". Ollama's OpenAI-compatible endpoint honours
+    #: ``reasoning_effort="none"``, which cuts that to 4. Neither ``think:
+    #: false`` nor ``chat_template_kwargs`` had any effect. Set to ``None`` for
+    #: backends that reject the field.
+    llm_reasoning_effort: str | None = "none"
+
     # --- agent -------------------------------------------------------------
     max_steps: int = 8
 

@@ -100,6 +100,35 @@ identical *metrics*, which involves tool calls, step accounting, and a much
 longer context. One greedy generation matching itself is a precondition, not
 the test.
 
+### Qwen3 reasons by default, and it dominates runtime
+
+Measured: answering "What is 17*23?" cost **847 completion tokens**. Almost all
+of it is reasoning the answer does not need.
+
+What works and what does not, tested against Ollama's OpenAI-compatible
+endpoint:
+
+| Attempt | completion_tokens |
+|---|---|
+| default | 847 |
+| `think: false` | 837 — no effect |
+| `chat_template_kwargs: {enable_thinking: false}` | 837 — no effect |
+| `/no_think` in the prompt | 749 — barely helps |
+| **`reasoning_effort: "none"`** | **4** |
+
+Only `reasoning_effort` works. It is set from
+`DEP_TRIAGE_LLM_REASONING_EFFORT`, default `none`.
+
+The effect on the agent is not marginal. A two-tool question
+("urllib3==1.26.4 is vulnerable, what is the lowest safe version?") went from
+**timing out at 120 s** to **4 s**.
+
+Revised per-task timing: **1.4–5 s**, against the 25 s/task that M0 scope §4.6
+assumed. A full 60-task run is minutes, not 20–30 minutes. The M0 estimate
+stays in the document as written, with this correction noted — the plan was
+costed before the reasoning overhead was known, and the fix made it cheaper,
+not more expensive.
+
 ### A driver mismatch that looks worse than it is
 
 `nvidia-smi` currently fails:
@@ -109,8 +138,11 @@ Failed to initialize NVML: Driver/library version mismatch
 NVML library version: 595.99
 ```
 
-Cause: the kernel module loaded at boot is 595.91.07, while the installed
-userspace and DKMS packages are 595.99.02. The upgrade completed and the new
+**Resolved by a reboot on 2026-10-09**; `nvidia-smi` now reports normally. Kept
+here because the symptom is alarming and the cause is not.
+
+Cause: the kernel module loaded at boot was 595.91.07, while the installed
+userspace and DKMS packages were 595.99.02. The upgrade completed and the new
 modules are built for the running kernel; they just are not loaded yet. Ubuntu
 set no `reboot-required` flag, which is why nothing announced it.
 

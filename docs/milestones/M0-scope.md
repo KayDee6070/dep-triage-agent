@@ -116,12 +116,12 @@ reported result.
 |---|---|---|---|---|---|
 | Is `pkg==X` vulnerable? — affected | 10 | 3 | 7 | 2 | yes + CVE set |
 | Is `pkg==X` vulnerable? — known, zero advisories | 6 | 2 | 4 | 2 | **not vulnerable** |
-| Unpublished version — **abstention probe** | 4 | 2 | 2 | 2 | **that version never shipped** |
+| Unpublished version — **abstention probe** | 6 | 2 | 4 | 2 | **that version never shipped** |
 | Unknown package — **abstention probe** | 6 | 2 | 4 | 2 | **unknown** |
-| Minimum safe version? | 12 | 4 | 8 | 2, 3 | version string |
-| Which packages in this file are vulnerable? | 10 | 3 | 7 | 1, 2 | set of names |
-| Can I upgrade on Python `N`? | 8 | 3 | 5 | 2, 3, 4 | bool + reason |
-| Direct CVE lookup — **over-call probe** | 4 | 1 | 3 | 2 | affected ranges |
+| Minimum safe version? | 10 | 3 | 7 | 2, 3 | version string |
+| Which packages in this file are vulnerable? | 8 | 3 | 5 | 1, 2 | set of names |
+| Can I upgrade on Python `N`? | 8 | 2 | 6 | 2, 3, 4 | bool + reason |
+| Direct CVE lookup — **over-call probe** | 6 | 3 | 3 | 2 | affected ranges |
 | **Total** | **60** | **20** | **40** | | |
 
 Both halves cover all six classes, so the dev subset is representative and the

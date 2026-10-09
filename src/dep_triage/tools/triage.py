@@ -28,8 +28,22 @@ from dep_triage.fixture import Fixture, normalise, sort_key, version_in
 #: :func:`list_releases`.
 RELEASE_WINDOW = 60
 
+#: ``lookup_vulnerabilities`` caps its advisory list for the same reason.
+#: Measured: pillow==1.7.7 matches 118 advisories and serialises to ~8,500
+#: tokens — more than the entire 8k context — and django==4.2 reaches ~7,900.
+#: An uncapped result could not fit alongside the conversation that requested
+#: it.
+ADVISORY_WINDOW = 10
+
+#: Advisory prose is the bulk of the payload and contributes nothing the
+#: scoring looks at.
+SUMMARY_MAX = 160
+
 LookupStatus = Literal["ok", "package_unknown"]
 CompatStatus = Literal["ok", "package_unknown", "version_unknown"]
+#: Same values as CompatStatus today, but a separate alias on purpose: sharing
+#: one would let either tool's status set silently constrain the other.
+LookupVulnStatus = Literal["ok", "package_unknown", "version_unknown"]
 ReleaseStatus = Literal["ok", "package_unknown", "invalid_argument"]
 
 _OPTION_PREFIXES = ("-r", "-e", "-c", "--", "-f", "-i")
@@ -90,6 +104,13 @@ def parse_requirements(fixture: Fixture, text: str) -> ParseResult:
 # --- tool 2: lookup_vulnerabilities ---------------------------------------
 
 
+def _clip(text: str | None) -> str | None:
+    """Trim advisory prose to :data:`SUMMARY_MAX`."""
+    if text is None or len(text) <= SUMMARY_MAX:
+        return text
+    return text[: SUMMARY_MAX - 1].rstrip() + "\u2026"
+
+
 class AdvisorySummary(BaseModel):
     id: str
     aliases: list[str] = Field(default_factory=list)
@@ -99,11 +120,21 @@ class AdvisorySummary(BaseModel):
 
 
 class VulnerabilityLookup(BaseModel):
-    status: CompatStatus
+    status: LookupVulnStatus
     package: str
     version: str
     vulnerable: bool = False
+
+    #: Capped at :data:`ADVISORY_WINDOW`. ``advisory_count`` is exact.
     advisories: list[AdvisorySummary] = Field(default_factory=list)
+    advisory_count: int = 0
+    truncated: bool = False
+
+    #: Every distinct fixed boundary across **all** matching advisories, not
+    #: just the ones shown. Truncating this would make "minimum safe version"
+    #: unanswerable whenever a package is heavily affected — which is exactly
+    #: when the question is interesting.
+    all_fixed_versions: list[str] = Field(default_factory=list)
 
     #: Whether the index still lists this version. False with ``status="ok"``
     #: means the version was withdrawn but advisories still name it.
@@ -134,32 +165,39 @@ def lookup_vulnerabilities(fixture: Fixture, package: str, version: str) -> Vuln
     if not fixture.has_package(key):
         return VulnerabilityLookup(status="package_unknown", package=key, version=version)
 
-    advisories = [
-        AdvisorySummary(
-            id=record.id,
-            aliases=record.aliases,
-            summary=record.summary,
-            severity=record.severity,
-            fixed_versions=record.fixed_versions(),
-        )
-        for record in fixture.vulns_for(key)
-        if version_in(version, record.affected_versions)
+    matching = [
+        record for record in fixture.vulns_for(key) if version_in(version, record.affected_versions)
     ]
 
     meta = fixture.package(key)
     published = meta is not None and meta.release(version) is not None
 
-    if not advisories and not published:
+    if not matching and not published:
         return VulnerabilityLookup(
             status="version_unknown", package=key, version=version, version_published=False
         )
+
+    fixes = sorted({f for record in matching for f in record.fixed_versions()}, key=sort_key)
+    shown = matching[:ADVISORY_WINDOW]
 
     return VulnerabilityLookup(
         status="ok",
         package=key,
         version=version,
-        vulnerable=bool(advisories),
-        advisories=advisories,
+        vulnerable=bool(matching),
+        advisories=[
+            AdvisorySummary(
+                id=record.id,
+                aliases=record.aliases,
+                summary=_clip(record.summary),
+                severity=record.severity,
+                fixed_versions=record.fixed_versions(),
+            )
+            for record in shown
+        ],
+        advisory_count=len(matching),
+        truncated=len(matching) > len(shown),
+        all_fixed_versions=fixes,
         version_published=published,
     )
 

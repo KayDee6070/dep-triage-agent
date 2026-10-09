@@ -30,6 +30,11 @@ from dep_triage.tools import triage
 
 FaultMode = Literal["error", "empty", "malformed"]
 
+#: Returned instead of a result once the call budget is spent. Phrased as an
+#: instruction because the agent has to decide what to do next, and "answer
+#: with what you have" is the behaviour D3 scores.
+BUDGET_MESSAGE = "tool call budget exhausted; answer with the information you already have"
+
 TOOL_NAMES = (
     "parse_requirements",
     "lookup_vulnerabilities",
@@ -74,7 +79,13 @@ def _empty(tool: str, payload: dict[str, Any]) -> dict[str, Any]:
     if tool == "parse_requirements":
         blanked.update(requirements=[], unparsed=[])
     elif tool == "lookup_vulnerabilities":
-        blanked.update(vulnerable=False, advisories=[])
+        blanked.update(
+            vulnerable=False,
+            advisories=[],
+            advisory_count=0,
+            truncated=False,
+            all_fixed_versions=[],
+        )
     elif tool == "list_releases":
         blanked.update(versions=[], yanked=[], latest=None, total_count=0, truncated=False)
     elif tool == "check_compatibility":
@@ -101,6 +112,9 @@ def _malformed(tool: str, payload: dict[str, Any]) -> dict[str, Any]:
             {k: v for k, v in advisory.items() if k != "fixed_versions"}
             for advisory in broken.get("advisories", [])
         ]
+        # The aggregate carries the same information, so it has to go too or
+        # the fault is trivially recoverable.
+        broken.pop("all_fixed_versions", None)
     elif tool == "list_releases":
         broken.pop("versions", None)
     elif tool == "check_compatibility":
@@ -120,15 +134,32 @@ class Toolkit:
     the schema exposed to the model stays free of harness plumbing.
     """
 
-    def __init__(self, fixture: Fixture, faults: tuple[ToolFault, ...] = ()) -> None:
+    def __init__(
+        self,
+        fixture: Fixture,
+        faults: tuple[ToolFault, ...] = (),
+        max_calls: int | None = None,
+    ) -> None:
         self._fixture = fixture
         self._faults = faults
         self._calls: list[ToolCallRecord] = []
         self._counts: dict[str, int] = {}
 
+        #: Hard ceiling on tool calls per task. Exceeding it refuses the call
+        #: rather than raising: LangGraph's ToolNode catches tool exceptions and
+        #: feeds them back to the model, so an exception would never surface.
+        #: Refusing lets us measure what the agent does when told to stop,
+        #: which is the point of D3.
+        self.max_calls = max_calls
+
     @property
     def calls(self) -> list[ToolCallRecord]:
         return list(self._calls)
+
+    @property
+    def budget_exhausted(self) -> bool:
+        """Whether any call was refused for exceeding :attr:`max_calls`."""
+        return any(call.error == BUDGET_MESSAGE for call in self._calls)
 
     def reset(self) -> None:
         self._calls.clear()
@@ -143,6 +174,18 @@ class Toolkit:
     def _invoke(
         self, tool: str, fn: Callable[[], BaseModel], arguments: dict[str, Any]
     ) -> dict[str, Any]:
+        if self.max_calls is not None and len(self._calls) >= self.max_calls:
+            self._calls.append(
+                ToolCallRecord(
+                    index=len(self._calls) + 1,
+                    tool=tool,
+                    arguments=arguments,
+                    ok=False,
+                    error=BUDGET_MESSAGE,
+                )
+            )
+            return {"status": "budget_exhausted", "error": BUDGET_MESSAGE}
+
         occurrence = self._counts.get(tool, 0) + 1
         self._counts[tool] = occurrence
         fault = self._fault_for(tool, occurrence)

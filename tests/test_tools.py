@@ -343,3 +343,69 @@ def test_compatibility_accepts_a_zero_padded_version(tiny_fixture: Fixture) -> N
     result = triage.check_compatibility(tiny_fixture, "demo-pkg", "1.0", "3.8")
     assert result.status == "ok"
     assert result.python_compatible is True
+
+
+# --- lookup_vulnerabilities: advisory cap --------------------------------
+
+
+def _many_advisory_fixture(tiny_fixture: Fixture) -> Fixture:
+    """demo-pkg 1.0.0 affected by 25 advisories with distinct fixes."""
+    from dep_triage.fixture import AffectedRange, Vulnerability
+
+    tiny_fixture.vulnerabilities["demo-pkg"] = [
+        Vulnerability(
+            id=f"GHSA-bulk-{n:04d}",
+            summary="x" * 400,
+            affected_versions=["1.0.0"],
+            ranges=[AffectedRange(introduced="1.0.0", fixed=f"3.{n}.0")],
+        )
+        for n in range(25)
+    ]
+    return tiny_fixture
+
+
+def test_advisory_list_is_capped_but_counts_are_exact(tiny_fixture: Fixture) -> None:
+    result = triage.lookup_vulnerabilities(
+        _many_advisory_fixture(tiny_fixture), "demo-pkg", "1.0.0"
+    )
+    assert result.vulnerable is True
+    assert result.advisory_count == 25, "the count must not be truncated"
+    assert len(result.advisories) == triage.ADVISORY_WINDOW
+    assert result.truncated is True
+
+
+def test_all_fixed_versions_survives_truncation(tiny_fixture: Fixture) -> None:
+    """Truncating fixes would make minimum-safe-version unanswerable."""
+    result = triage.lookup_vulnerabilities(
+        _many_advisory_fixture(tiny_fixture), "demo-pkg", "1.0.0"
+    )
+    assert len(result.all_fixed_versions) == 25
+    assert "3.24.0" in result.all_fixed_versions, "a fix from a hidden advisory must still appear"
+
+
+def test_advisory_summaries_are_clipped(tiny_fixture: Fixture) -> None:
+    result = triage.lookup_vulnerabilities(
+        _many_advisory_fixture(tiny_fixture), "demo-pkg", "1.0.0"
+    )
+    for advisory in result.advisories:
+        assert advisory.summary is not None
+        assert len(advisory.summary) <= triage.SUMMARY_MAX
+
+
+def test_short_results_are_not_marked_truncated(tiny_fixture: Fixture) -> None:
+    result = triage.lookup_vulnerabilities(tiny_fixture, "demo-pkg", "1.0.0")
+    assert result.truncated is False
+    assert result.advisory_count == len(result.advisories) == 1
+
+
+def test_real_fixture_no_lookup_exceeds_the_context(real_fixture: Fixture) -> None:
+    """A single tool result must never fill the 8k context on its own."""
+    import json
+
+    worst = 0
+    for name, meta in real_fixture.packages.items():
+        for version in meta.versions[::11]:
+            payload = triage.lookup_vulnerabilities(real_fixture, name, version)
+            worst = max(worst, len(json.dumps(payload.model_dump())))
+    approx_tokens = worst / 3.5
+    assert approx_tokens < 2500, f"worst lookup is ~{approx_tokens:.0f} tokens"

@@ -207,3 +207,44 @@ def test_invalid_argument_is_not_recorded_as_a_tool_failure(tiny_fixture: Fixtur
     assert payload["status"] == "invalid_argument"
     assert kit.calls[0].ok is True
     assert kit.calls[0].fault is None
+
+
+def test_malformed_fault_also_removes_the_fix_aggregate(tiny_fixture: Fixture) -> None:
+    """Leaving all_fixed_versions would make the fault trivially recoverable."""
+    kit = Toolkit(
+        tiny_fixture, faults=(ToolFault(tool="lookup_vulnerabilities", mode="malformed"),)
+    )
+    payload = kit.lookup_vulnerabilities("demo-pkg", "1.0.0")
+    assert "all_fixed_versions" not in payload
+    assert "fixed_versions" not in payload["advisories"][0]
+
+
+# --- call budget ----------------------------------------------------------
+
+
+def test_calls_beyond_the_budget_are_refused_not_executed(tiny_fixture: Fixture) -> None:
+    kit = Toolkit(tiny_fixture, max_calls=2)
+    assert kit.list_releases("demo-pkg")["status"] == "ok"
+    assert kit.list_releases("clean-pkg")["status"] == "ok"
+    refused = kit.lookup_vulnerabilities("demo-pkg", "1.0.0")
+
+    assert refused["status"] == "budget_exhausted"
+    assert kit.budget_exhausted is True
+    assert kit.calls[2].ok is False
+    assert len(kit.calls) == 3, "the refusal is still recorded — D3 needs to see it"
+
+
+def test_budget_refusal_does_not_raise(tiny_fixture: Fixture) -> None:
+    """LangGraph's ToolNode catches tool exceptions, so refusal must return."""
+    kit = Toolkit(tiny_fixture, max_calls=1)
+    kit.list_releases("demo-pkg")
+    payload = kit.list_releases("demo-pkg")
+    assert payload["status"] == "budget_exhausted"
+
+
+def test_no_budget_means_unlimited(tiny_fixture: Fixture) -> None:
+    kit = Toolkit(tiny_fixture)
+    for _ in range(12):
+        kit.list_releases("demo-pkg")
+    assert kit.budget_exhausted is False
+    assert len(kit.calls) == 12
