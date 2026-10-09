@@ -184,9 +184,17 @@ def test_a_failing_model_is_a_result_not_a_crash(tiny_fixture: Fixture) -> None:
     assert result.answer == ""
 
 
-def test_system_prompt_names_the_three_negatives() -> None:
-    """The agent is told these differ; conflating them is a scored failure."""
-    lowered = SYSTEM_PROMPT.lower()
-    assert "unknown" in lowered
-    assert "does not exist" in lowered
-    assert "not vulnerable" in lowered
+def test_system_prompt_names_every_verdict_token() -> None:
+    """The agent must be told the four verdicts the grader can parse.
+
+    A token the grader accepts but the prompt never mentions would be scored
+    as an agent failure when it is really a specification gap.
+    """
+    from dep_triage.eval.grading import VERDICT_TOKENS
+
+    for token in VERDICT_TOKENS:
+        assert token in SYSTEM_PROMPT, f"prompt never mentions {token}"
+
+
+def test_system_prompt_asks_for_the_answer_line() -> None:
+    assert "ANSWER:" in SYSTEM_PROMPT

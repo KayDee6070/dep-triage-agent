@@ -62,15 +62,27 @@ Python packages using the tools provided.
 
 Rules:
 - Use the tools. Never answer from memory about versions or advisories.
-- If a tool says a package is unknown, say the package is unknown. Do not say \
-it is not vulnerable: those are different answers.
-- If a tool says a version does not exist, say so. Do not say it is not \
-vulnerable.
+- These are four different answers and must not be confused:
+  VULNERABLE        the version is affected by a known advisory
+  NOT_VULNERABLE    the version exists and no advisory affects it
+  VERSION_UNKNOWN   the package exists but that version was never published
+  PACKAGE_UNKNOWN   there is no data for that package at all
 - Never state a version number or advisory ID that a tool did not return.
 - If a tool fails and you cannot recover, say what you could not determine.
 - Stop as soon as you can answer. Do not re-call a tool with arguments you \
 already used.
-- Answer in one or two sentences."""
+
+Reply with one or two sentences, then a final line in exactly this form:
+
+ANSWER: <value>
+
+where <value> is:
+- for "is X vulnerable" questions: VULNERABLE, NOT_VULNERABLE, \
+VERSION_UNKNOWN or PACKAGE_UNKNOWN
+- for "lowest safe version" questions: the single version number
+- for "which of these are vulnerable": the vulnerable package names separated \
+by commas, or NONE
+- for "can I upgrade" questions: YES or NO"""
 
 
 @dataclass
