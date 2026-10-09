@@ -1,13 +1,24 @@
 """Ground truth, computed from the fixture.
 
-Two things come out of here per task: the expected answer, and the **minimal
-necessary tool set**. Neither is hand-written.
+Two things come out of here per task: the expected answer, and the **reference
+path** — the tools this resolver had to touch. Neither is hand-written.
 
-The tool set is derived rather than declared. A resolver can only reach the
-fixture through :class:`Evidence`, and every ``Evidence`` accessor maps to
-exactly one tool, so the set of tools a question requires is whatever the
-resolver had to touch to answer it. There is no opportunity for a declaration
-to disagree with the computation, which is what M0 scope §3.5 promises.
+The path is derived rather than declared. A resolver can only reach the fixture
+through :class:`Evidence`, and every ``Evidence`` accessor maps to exactly one
+tool, so the recorded set is whatever the computation actually used. No
+declaration can disagree with it.
+
+**It is the reference path, not a proof of minimality.** Measured on 2026-10-09
+by running the baselines: 53 of 54 ``minimum_safe_version`` cases can be
+answered from ``lookup_vulnerabilities`` alone, because advisories carry fix
+boundaries and the highest one is almost always the answer. The resolver's path
+is ``{lookup, releases}``; a shorter correct path exists. Likewise
+``which_vulnerable`` can be answered without ``parse_requirements``, since the
+pins are visible in the question text.
+
+So ``tool_recall`` measures **agreement with the reference path**, not logical
+necessity. The earlier framing ("minimal necessary tool set") claimed more than
+the mechanism proves, and the baselines are what exposed it.
 
 ``Evidence`` reads the fixture **completely**, not through the agent-facing
 tools. Those cap their output (10 advisories, 60 versions) to fit an 8k

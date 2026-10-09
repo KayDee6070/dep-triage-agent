@@ -38,6 +38,22 @@ AnswerKind = Literal["label", "version", "name_set", "bool"]
 #: nameable mistake — see M0 scope §3.6.
 Verdict = Literal["vulnerable", "not_vulnerable", "version_unknown", "package_unknown"]
 
+#: Classes a single tool can answer in practice, measured rather than assumed.
+#: ``minimum_safe_version`` leaks through advisory fix boundaries;
+#: ``which_vulnerable`` leaks because the pins are in the question text. Kept
+#: here so no reader of ``required_tools`` mistakes it for logical necessity.
+ONE_TOOL_SUFFICIENT: frozenset[TaskClass] = frozenset(
+    {
+        "vulnerable_affected",
+        "vulnerable_clean",
+        "version_unpublished",
+        "package_unknown",
+        "single_package_overcall",
+        "minimum_safe_version",
+        "which_vulnerable",
+    }
+)
+
 ANSWER_KINDS: dict[TaskClass, AnswerKind] = {
     "vulnerable_affected": "label",
     "vulnerable_clean": "label",

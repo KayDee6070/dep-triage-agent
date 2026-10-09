@@ -1,7 +1,7 @@
 {
   "package_count": 80,
   "schema_version": 1,
-  "snapshot_date": "2026-10-08",
+  "snapshot_date": "2026-10-09",
   "sources": {
     "osv": "https://api.osv.dev/v1/query",
     "pypi": "https://pypi.org/pypi/{name}/json"

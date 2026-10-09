@@ -133,6 +133,12 @@ def fetch_vulnerabilities(name: str) -> list[Vulnerability]:
 
             affected_versions.update(affected.get("versions") or [])
             for entry in affected.get("ranges") or []:
+                # ECOSYSTEM ranges carry package versions. GIT ranges carry
+                # commit SHAs, and collecting those put strings like
+                # bd8153872e9c6fc98f4023df9c2deaffea2fa463 into fixed_versions,
+                # where they read as released versions to anything downstream.
+                if entry.get("type") != "ECOSYSTEM":
+                    continue
                 for event in entry.get("events") or []:
                     if "introduced" in event or "fixed" in event:
                         ranges.append(

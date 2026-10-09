@@ -318,7 +318,8 @@ def build(fixture: Fixture) -> TaskSet:
                 question=(
                     f"I have {name}=={from_version} pinned and I run Python "
                     f"{python_version}. Can I upgrade to the lowest version of "
-                    f"{name} with no known advisories, on that Python?"
+                    f"{name} with no known advisories, on that Python? "
+                    "Answer yes or no."
                 ),
             )
         )
