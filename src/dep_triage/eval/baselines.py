@@ -118,7 +118,11 @@ def run_no_agent(
         gathered[f"lookup_vulnerabilities({name}=={version})"] = toolkit.lookup_vulnerabilities(
             name, version
         )
-        gathered[f"list_releases({name})"] = toolkit.list_releases(name, since_version=version)
+        # Unfiltered, deliberately. An earlier version passed
+        # since_version=version here, which is a routing decision: a script
+        # that knows to narrow the query is not "call everything", and it hid
+        # the one condition where routing can structurally win (M0 scope §5.6).
+        gathered[f"list_releases({name})"] = toolkit.list_releases(name)
         gathered[f"check_compatibility({name}=={version}, py{python_version})"] = (
             toolkit.check_compatibility(name, version, python_version)
         )

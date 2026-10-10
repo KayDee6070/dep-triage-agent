@@ -147,7 +147,7 @@ def resolve(task: TaskSpec, fixture: Fixture) -> GroundTruth:
         truth.oracle_calls = 1
         truth.rationale = f"{task.package}=={task.version} -> {verdict}"
 
-    elif task.task_class == "minimum_safe_version":
+    elif task.task_class in {"minimum_safe_version", "minimum_safe_version_deep"}:
         assert task.package is not None and task.from_version is not None
         answer = lowest_clean_version(evidence, task.package, task.from_version)
         truth.expected_version = answer

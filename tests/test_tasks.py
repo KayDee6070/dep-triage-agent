@@ -58,8 +58,15 @@ def test_allocation_sums_to_the_documented_split() -> None:
 
 def test_every_class_clears_the_thinness_floor() -> None:
     """Below 2 dev tasks a class is iterated on blind."""
+    from dep_triage.eval.tasks import EXISTENCE_PROBE_CLASSES
+
     for task_class, (dev, held) in ALLOCATION.items():
         assert dev >= 2, f"{task_class} has only {dev} dev tasks"
+        if task_class in EXISTENCE_PROBE_CLASSES:
+            # Reported as traces, not rates. The fixture holds only four
+            # distinct cases and padding with near-duplicates would manufacture
+            # precision the data does not have.
+            continue
         assert held >= 3, f"{task_class} has only {held} held-out tasks"
 
 
@@ -180,6 +187,7 @@ def test_required_tools_are_derived_not_declared(task_set: TaskSet, real_fixture
         "package_unknown": ["lookup_vulnerabilities"],
         "single_package_overcall": ["lookup_vulnerabilities"],
         "minimum_safe_version": ["list_releases", "lookup_vulnerabilities"],
+        "minimum_safe_version_deep": ["list_releases", "lookup_vulnerabilities"],
         "which_vulnerable": ["lookup_vulnerabilities", "parse_requirements"],
         "python_upgrade": ["check_compatibility", "list_releases", "lookup_vulnerabilities"],
     }

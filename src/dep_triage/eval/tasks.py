@@ -25,6 +25,7 @@ TaskClass = Literal[
     "version_unpublished",
     "package_unknown",
     "minimum_safe_version",
+    "minimum_safe_version_deep",
     "which_vulnerable",
     "python_upgrade",
     "single_package_overcall",
@@ -60,6 +61,7 @@ ANSWER_KINDS: dict[TaskClass, AnswerKind] = {
     "version_unpublished": "label",
     "package_unknown": "label",
     "minimum_safe_version": "version",
+    "minimum_safe_version_deep": "version",
     "which_vulnerable": "name_set",
     "python_upgrade": "bool",
     "single_package_overcall": "label",
@@ -70,15 +72,31 @@ ANSWER_KINDS: dict[TaskClass, AnswerKind] = {
 #: quietly producing a thinner benchmark than the documents claim.
 ALLOCATION: dict[TaskClass, tuple[int, int]] = {
     # class: (dev, held_out)
-    "vulnerable_affected": (3, 7),
+    "vulnerable_affected": (2, 6),
     "vulnerable_clean": (2, 4),
     "version_unpublished": (2, 4),
     "package_unknown": (2, 4),
-    "minimum_safe_version": (3, 7),
+    "minimum_safe_version": (2, 6),
+    "minimum_safe_version_deep": (2, 2),
     "which_vulnerable": (3, 5),
     "python_upgrade": (2, 6),
     "single_package_overcall": (3, 3),
 }
+
+#: Classes reported as traces rather than rates.
+#:
+#: ``minimum_safe_version_deep`` tests the one condition where routing can
+#: structurally beat exhaustive calling: the answer lies outside the window an
+#: unfiltered ``list_releases`` returns, *and* the advisory fix boundaries do
+#: not point at it. The committed snapshot contains only four genuinely
+#: distinct cases — eight if adjacent floors are counted, but ``certifi`` from
+#: 1.0.0 and 1.0.1 both answer 14.05.14, so those are duplicates.
+#:
+#: Four tasks cannot carry a rate. They can carry an existence claim, which
+#: needs no interval, so this class is exempt from the per-class held-out floor
+#: and is reported as traces. Padding it with near-duplicates to reach a
+#: respectable count would manufacture precision that the data does not have.
+EXISTENCE_PROBE_CLASSES: frozenset[TaskClass] = frozenset({"minimum_safe_version_deep"})
 
 
 class TaskSpec(BaseModel):
@@ -117,6 +135,7 @@ class TaskSpec(BaseModel):
             "version_unpublished": ("package", "version"),
             "package_unknown": ("package", "version"),
             "minimum_safe_version": ("package", "from_version"),
+            "minimum_safe_version_deep": ("package", "from_version"),
             "which_vulnerable": ("requirements",),
             "python_upgrade": ("package", "from_version", "python_version"),
             "single_package_overcall": ("package", "version", "requirements"),

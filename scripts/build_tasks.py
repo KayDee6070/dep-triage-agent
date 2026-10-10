@@ -37,7 +37,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from dep_triage.eval.reference import Evidence, lowest_clean_version
 from dep_triage.eval.tasks import ALLOCATION, TaskClass, TaskSet, TaskSpec
-from dep_triage.fixture import Fixture, load_fixture, parse_version
+from dep_triage.fixture import (
+    Fixture,
+    load_fixture,
+    parse_version,
+    sort_key,
+    versions_equal,
+)
 from dep_triage.fixture_spec import HELD_OUT_UNKNOWN
 from dep_triage.tools import triage
 
@@ -158,6 +164,48 @@ def pick_minimum_safe(fixture: Fixture, want: int) -> list[tuple[str, str, str]]
     return found[:want]
 
 
+def pick_minimum_safe_deep(fixture: Fixture, want: int) -> list[tuple[str, str, str]]:
+    """Cases where exhaustive calling structurally cannot find the answer.
+
+    Three conditions, all required:
+
+    * the answer lies **outside** the window an unfiltered ``list_releases``
+      returns, so a script that calls the tool naively cannot see it;
+    * the highest advisory fix boundary is **not** the answer, so the
+      one-tool shortcut through ``all_fixed_versions`` gives the wrong version;
+    * a ``since_version`` query **does** reach it, so a routed agent can.
+
+    One per package: ``certifi`` from 1.0.0 and 1.0.1 both answer 14.05.14, and
+    counting them twice would inflate the class with duplicates.
+    """
+    found: list[tuple[str, str, str]] = []
+    for name in _packages(fixture, "deep"):
+        meta = fixture.package(name)
+        if meta is None or len(meta.releases) <= triage.RELEASE_WINDOW:
+            continue
+        unfiltered = set(triage.list_releases(fixture, name).versions)
+        for from_version in _stable(Evidence(fixture).published_versions(name)):
+            if Evidence(fixture).verdict(name, from_version) != "vulnerable":
+                continue
+            answer = lowest_clean_version(Evidence(fixture), name, from_version)
+            if answer is None or not _stable([answer]) or answer in unfiltered:
+                continue
+            if (
+                answer
+                not in triage.list_releases(fixture, name, since_version=from_version).versions
+            ):
+                continue
+            fixes = triage.lookup_vulnerabilities(fixture, name, from_version).all_fixed_versions
+            shortcut = max(fixes, key=sort_key) if fixes else None
+            if shortcut is not None and versions_equal(shortcut, answer):
+                continue
+            found.append((name, from_version, answer))
+            break
+        if len(found) >= want:
+            break
+    return found[:want]
+
+
 def pick_python_upgrade(fixture: Fixture, want: int) -> list[tuple[str, str, str, bool]]:
     """``(package, from_version, python_version, expected)``, both outcomes present."""
     yes: list[tuple[str, str, str, bool]] = []
@@ -203,6 +251,7 @@ def build(fixture: Fixture) -> TaskSet:
     unpublished = pick_unpublished(fixture, totals["version_unpublished"])
     minimum = pick_minimum_safe(fixture, totals["minimum_safe_version"])
     upgrades = pick_python_upgrade(fixture, totals["python_upgrade"])
+    deep = pick_minimum_safe_deep(fixture, totals["minimum_safe_version_deep"])
 
     for idx, ((name, version), split) in enumerate(
         zip(affected, splits("vulnerable_affected"), strict=True), 1
@@ -269,6 +318,23 @@ def build(fixture: Fixture) -> TaskSet:
                 id=f"minsafe-{idx:02d}",
                 split=split,  # type: ignore[arg-type]
                 task_class="minimum_safe_version",
+                package=name,
+                from_version=from_version,
+                question=(
+                    f"I have {name}=={from_version} pinned. What is the lowest "
+                    f"version of {name} I can upgrade to that has no known advisories?"
+                ),
+            )
+        )
+
+    for idx, ((name, from_version, _), split) in enumerate(
+        zip(deep, splits("minimum_safe_version_deep"), strict=True), 1
+    ):
+        tasks.append(
+            TaskSpec(
+                id=f"minsafe-deep-{idx:02d}",
+                split=split,  # type: ignore[arg-type]
+                task_class="minimum_safe_version_deep",
                 package=name,
                 from_version=from_version,
                 question=(
