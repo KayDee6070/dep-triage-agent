@@ -67,6 +67,17 @@ class Settings(BaseSettings):
     llm_seed: int = 42
     llm_timeout_s: int = 120
 
+    #: Transport-level retries. **Zero by default**, because a local backend
+    #: that fails has failed, and silently retrying would hide it.
+    #:
+    #: Hosted backends need this. A free tier returns HTTP 429 under load, and
+    #: a rate-limited request is an infrastructure outcome, not a model
+    #: decision — scoring it as a wrong answer would measure the provider's
+    #: throttle instead of the model. The client backs off exponentially, and
+    #: retries are safe for tool accounting because tools execute locally only
+    #: on the response that is actually returned.
+    llm_max_retries: int = 0
+
     #: Qwen3 reasons by default, and it is expensive: ~840 completion tokens to
     #: answer "17*23". Ollama's OpenAI-compatible endpoint honours
     #: ``reasoning_effort="none"``, which cuts that to 4. Neither ``think:

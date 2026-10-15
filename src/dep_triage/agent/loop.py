@@ -106,7 +106,7 @@ def build_model(settings: Settings) -> ChatOpenAI:
         api_key=settings.llm_api_key or "unused",  # type: ignore[arg-type]
         temperature=settings.llm_temperature,
         timeout=settings.llm_timeout_s,
-        max_retries=0,  # a retry would silently double-count a tool call
+        max_retries=settings.llm_max_retries,
         seed=settings.llm_seed,
         **extra,
     )
