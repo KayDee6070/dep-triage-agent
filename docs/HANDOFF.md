@@ -103,7 +103,21 @@ static report and one form · Grafana · fine-tuning.
 
 ---
 
-## 3. There is no deadline — the Definition of Done is the stopping line
+## 3. The project is complete
+
+All six definition-of-done criteria are met. The held-out set was measured
+once, the report is published at
+<https://huggingface.co/spaces/KayDee6070/dep-triage-agent>, and the service is
+published as a container image.
+
+**The held-out set is spent.** It cannot be re-run for the local model, and the
+reservation ledger in `data/.held-out-runs/` enforces that on disk. Any further
+work is additive: nothing may change a prompt, a tool, a task or the fixture
+and then report a number against the sealed set.
+
+See `docs/milestones/M7-report.md` for the result and what remains weak.
+
+## 4. There is no deadline — the Definition of Done was the stopping line
 
 **Changed by Kuntal on 2026-10-15: quality over schedule. The 14-day deadline
 is withdrawn.**

@@ -42,6 +42,10 @@ from dep_triage.eval.tasks import (  # noqa: E402
 from dep_triage.fixture import load_fixture, version_in, versions_equal  # noqa: E402
 from dep_triage.tools import triage  # noqa: E402
 
+#: Below this many discordant pairs an exact two-sided McNemar test cannot
+#: reach p < 0.05 under any split, so the comparison cannot resolve.
+MIN_DISCORDANT = 6
+
 GREEN, RED, DIM, BOLD, RESET = "\033[32m", "\033[31m", "\033[2m", "\033[1m", "\033[0m"
 
 
@@ -99,9 +103,11 @@ def main() -> int:
         json.loads((REPO / "data" / "tasks.json").read_text(encoding="utf-8"))
     )
     truth: dict[str, GroundTruth] = {t.id: resolve(t, fixture) for t in task_set.tasks}
-    clean = json.loads((REPO / "results/m3-gates/run-1.metrics.json").read_text())
-    faults = json.loads((REPO / "results/m3-faults.metrics.json").read_text())
+    dev = json.loads((REPO / "results/m3-gates/run-1.metrics.json").read_text())
     gates = json.loads((REPO / "results/m3-gates/gates.json").read_text())
+    final = json.loads((REPO / "results/held-out-final.json").read_text())
+    clean = final["metrics"]
+    faults = json.loads((REPO / "results/held-out-final-faults.json").read_text())["metrics"]
 
     # ------------------------------------------------------------------
     study.section("1. What this project actually is")
@@ -403,9 +409,12 @@ def main() -> int:
         {", ".join(excluded)}.
 
         They are permanently excluded rather than quietly reused. The final
-        measurement is over {len(held) - len(excluded)} tasks, not {len(held)},
+        measurement ran over {len(held) - len(excluded)} tasks, not {len(held)},
         and their answers are published as historical examples instead of being
         pretended away.
+
+        The sealed set has now been spent. It was executed once, after the last
+        change to anything the agent does, and no further run is possible.
         """
     )
     study.claim(
@@ -429,9 +438,14 @@ def main() -> int:
         ),
     )
     study.claim(
-        "the held-out set has still never been run",
-        not list((REPO / "results").glob("held-out-final*.json")),
-        "no held-out artifact exists",
+        "the final measurement was executed on the held-out split",
+        final["split"] == "held_out",
+        f"{clean['systems']['agent']['clean']['total']} tasks",
+    )
+    study.claim(
+        "it consumed a reservation that cannot be reused",
+        (REPO / "data/.held-out-runs").is_dir(),
+        "an on-disk ledger, not a convention",
     )
 
     # ------------------------------------------------------------------
@@ -502,7 +516,7 @@ def main() -> int:
           no_agent       calls every tool on every package, answers once
           always_lookup  calls one tool, ever
 
-        Development results:
+        Final held-out results:
 
           agent          {score(agent)}
           no_agent       {score(no_agent)}
@@ -518,14 +532,23 @@ def main() -> int:
         The task set was deliberately not redesigned until the agent won — that
         would be fitting the benchmark to a desired result.
 
-        The one axis the agent already wins is cost: {agent["cost"]["tool_calls"]["mean"]}
+        The one axis the agent wins is cost: {agent["cost"]["tool_calls"]["mean"]}
         calls against {no_agent["cost"]["tool_calls"]["mean"]}.
+
+        A fifteen-times larger hosted model was also measured, on the
+        development split only. It moved the agent from 80 to 90 per cent and
+        the call-everything baseline from 90 to 95. The finding survives a much
+        bigger model; it is not an artefact of using a small one.
         """
     )
     study.claim(
-        "both baselines scored at least as well as the agent",
-        no_agent["correct"] >= agent["correct"] and always["correct"] >= agent["correct"],
-        f"{agent['correct']} vs {no_agent['correct']} and {always['correct']}",
+        "no comparison separated the agent from either baseline",
+        all(
+            arms["clean"]["mcnemar_exact_p"] is None or arms["clean"]["mcnemar_exact_p"] >= 0.05
+            for arms in clean["paired"].values()
+        ),
+        f"agent {agent['correct']}, no_agent {no_agent['correct']}, "
+        f"always_lookup {always['correct']} of {agent['total']}",
     )
     study.claim(
         "the agent used fewer tool calls than no_agent",
@@ -565,17 +588,21 @@ def main() -> int:
         """
     )
     study.claim(
-        "there were 2 discordant pairs against no_agent", paired_na["discordant_pairs"] == 2, "2"
+        "the discordant pairs are too few for the test to resolve",
+        paired_na["discordant_pairs"] < MIN_DISCORDANT,
+        f"{paired_na['discordant_pairs']} against no_agent, "
+        f"{paired_al['discordant_pairs']} against always_lookup; {MIN_DISCORDANT} needed",
     )
     study.claim(
-        "the exact test could not have reached significance",
-        paired_na["mcnemar_exact_p"] >= 0.05 and 2 * 0.5**2 == 0.5,
-        f"p={paired_na['mcnemar_exact_p']}, floor=0.50",
+        "the exact test could not have reached significance at this pair count",
+        paired_na["mcnemar_exact_p"] >= 0.05 and 2 * 0.5 ** paired_na["discordant_pairs"] > 0.05,
+        f"p={paired_na['mcnemar_exact_p']}, "
+        f"floor={min(1.0, 2 * 0.5 ** paired_na['discordant_pairs']):.2f}",
     )
     study.claim(
-        "six discordant pairs are the minimum for attainable significance",
-        2 * 0.5**6 < 0.05 <= 2 * 0.5**5,
-        "2·0.5^6 = 0.031",
+        f"{MIN_DISCORDANT} discordant pairs are the minimum for attainable significance",
+        2 * 0.5**MIN_DISCORDANT < 0.05 <= 2 * 0.5 ** (MIN_DISCORDANT - 1),
+        f"2*0.5^{MIN_DISCORDANT} = {2 * 0.5**MIN_DISCORDANT:.3f}",
     )
 
     # ------------------------------------------------------------------
@@ -623,9 +650,9 @@ def main() -> int:
     )
     study.claim(
         "they crashed rather than answering",
-        na_error["d2"]["behaviours"]["crashed"] == 10
-        and al_error["d2"]["behaviours"]["crashed"] == 10,
-        "10 crashes each",
+        na_error["d2"]["behaviours"]["crashed"] > 0 and al_error["d2"]["behaviours"]["crashed"] > 0,
+        f"{na_error['d2']['behaviours']['crashed']} and "
+        f"{al_error['d2']['behaviours']['crashed']} crashes",
     )
     study.claim(
         "correctness under a fault is recorded as not proving recovery",
@@ -685,6 +712,68 @@ def main() -> int:
         frozenset({"minimum_safe_version_deep"}) == EXISTENCE_PROBE_CLASSES
         and sum(ALLOCATION["minimum_safe_version_deep"]) == 4,
         "4 tasks cannot carry a rate",
+    )
+
+    # ------------------------------------------------------------------
+    study.section("13. The run that was voided, and the rule it exposed")
+    ledger = sorted((REPO / "data/.held-out-runs").glob("*.json"))
+    released = [
+        path
+        for path in ledger
+        if json.loads(path.read_text()).get("state", "").startswith("released")
+    ]
+    voided = json.loads((REPO / "results/held-out-hosted.json").read_text())
+    voided_gradable = [
+        r for r in voided["records"] if (r.get("grade") or {}).get("correct") is not None
+    ]
+    study.say(
+        f"""
+        The hosted model's final run failed completely: the provider returned
+        HTTP 403 to every request, so all {len(voided["records"])} executions
+        ended before the model saw a task.
+
+        That spent a reservation on a measurement that never happened. The
+        tempting move is to call it an exception and re-run. The honest reading
+        is that it exposed a flaw in the rule.
+
+        A reservation exists to prevent re-measuring AFTER seeing a result.
+        Counting attempts is a proxy for that, and the proxy is wrong here: no
+        answer was produced and no score computed, so nothing exists that could
+        be iterated against.
+
+        So the proxy was corrected rather than excused, and given a line that is
+        checked mechanically instead of argued:
+
+            zero gradable records, or the reservation is spent.
+
+        One graded task and it is gone permanently. That cannot be gamed — a run
+        engineered to produce no gradable records contains, by construction, no
+        information about the held-out set. Released reservations are superseded
+        rather than deleted, so the release stays visible as evidence.
+
+        The failed artifacts are committed too. The provider never lifted the
+        block, so the hosted column remains development-only.
+        """
+    )
+    study.claim(
+        "the voided run produced no gradable record at all",
+        not voided_gradable,
+        f"0 of {len(voided['records'])}",
+    )
+    study.claim(
+        "its reservations were released, not deleted",
+        len(released) == 6 and all(json.loads(p.read_text()).get("history") for p in released),
+        f"{len(released)} released, each retaining its history",
+    )
+    study.claim(
+        "the local model's reservations remain spent",
+        any(json.loads(p.read_text()).get("state", "").startswith("reserved") for p in ledger),
+        "a successful run is never releasable",
+    )
+    study.claim(
+        "the failed artifacts are kept as evidence",
+        (REPO / "results/held-out-hosted.json").is_file()
+        and (REPO / "results/held-out-hosted-faults.json").is_file(),
     )
 
     return study.finish()

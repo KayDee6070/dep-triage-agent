@@ -9,12 +9,12 @@ harness that measures whether it actually works.**
 
 | | |
 |---|---|
-| **State** | **M6 complete** — service built, hardened and verified in-container. **Not published**; held-out set not yet run. |
+| **State** | **Complete.** Held-out set measured once; report published. |
 | Schedule | No deadline; the six definition-of-done criteria are the stopping line |
-| Tests | 302, ruff clean, mypy `strict` on 51 files |
+| Tests | 316, ruff clean, mypy `strict` on 54 files |
 | Clone to green | **18 s** cold cache (budget 60 s) |
 | Fixture | 80 packages, 1487 advisories, snapshot 2026-10-09 |
-| Results | [M3 measurements](docs/milestones/M3-report.md), [M4 diagnosis](docs/milestones/M4-report.md); no final result yet |
+| Results | **Measured.** 38 held-out tasks, run once — see below |
 
 The JSON harness, both baselines, fault suite, held-out guard, and CLI Docker
 image work. The static HTML report and deployed HTTP service remain later work.
@@ -277,26 +277,65 @@ bear.
 
 ## Results
 
-**Final evaluation not yet measured.** Development results, gate outcomes,
-faults, and limitations are in [M3-report.md](docs/milestones/M3-report.md).
+**38 held-out tasks, executed once**, after the last change to anything the
+agent does. Two of the original 40 were burned during development and are
+permanently excluded.
 
-| | Agent | `no-agent` | `always-lookup` |
+| System | Score | Accuracy | 95% CI | Ungradable | Mean calls |
+|---|---|---|---|---|---|
+| agent | 35/38 | 92% | 79–97% | 0 | 2.79 |
+| `no_agent` (calls every tool) | 34/38 | 94% | 82–98% | 2 | 4.95 |
+| `always_lookup` (one tool) | 35/38 | 92% | 79–97% | 0 | 1.58 |
+
+| Paired, agent's view | W/T/L | Discordant | Exact McNemar p |
 |---|---|---|---|
-| `task_accuracy` (eligible held-out 38) | — | — | — |
-| vs agent: wins / ties / losses | — | — | — |
-| `discordant_pairs`, McNemar p | — | — | — |
-| `tool_recall` / `tool_precision` | — | n/a | n/a |
-| `negative_conflation_rate` | — | — | — |
-| `recovery_rate` | — | — | — |
-| `fabrication_per_assertion` (lower bound) | — | — | — |
-| `fabrication_per_task` (lower bound) | — | — | — |
-| `termination_rate` / `over_call_ratio` | — | n/a | n/a |
+| vs `no_agent` | 2 / 31 / 3 | 5 | 1.0 |
+| vs `always_lookup` | 2 / 34 / 2 | 4 | 1.0 |
 
-Reported for two models — Qwen3-8B local (the evaluated agent) and the hosted
-open-weight model behind the live demo — so nothing on the public link is an
-unmeasured claim.
+**Tool routing provided no measurable accuracy benefit over calling every
+tool.** Both comparisons sit below the six discordant pairs an exact two-sided
+test needs to reach p < 0.05 under *any* split, so neither resolves. Reported
+as unresolvable, not as equivalence.
 
----
+This is expected, not surprising. `no_agent` calls every tool, so it always
+holds **strictly more information** than a routing agent. Routing is dominated
+whenever calling everything is affordable and fits in the context window — that
+is arithmetic, not a property of this task set, and the task set was
+deliberately not redesigned until the agent won.
+
+### Where routing does pay off
+
+| System | `error` (503) | `empty` | `malformed` |
+|---|---|---|---|
+| agent | **10/20** | 11/19 | 18/20 |
+| `no_agent` | **0 gradable — 20 crashes** | 13/19 | 19/19 |
+| `always_lookup` | **0 gradable — 20 crashes** | 10/20 | 16/19 |
+
+Both baselines are single-shot scripts: a failing tool takes the whole run
+down. With zero gradable baseline records there are zero usable pairs, so this
+is an **operational** difference — the baselines die, the agent does not — and
+not a measured accuracy win.
+
+### Diagnostics
+
+`tool_recall` 0.99 · `tool_precision` 1.00 · termination 0.95 · over-call ratio
+1.32 · **zero fabrications**, hard and misattributed both nil.
+
+Both fabrication rates are lower bounds, and the detector is itself unvalidated
+against hand labels.
+
+### The hosted model has no held-out column
+
+A second model (`openai/gpt-oss-120b`, 15× larger) was measured on the
+**development** split only: it moved the agent 80%→90% while `no_agent` moved
+90%→95%. The finding survives a much bigger model.
+
+Its held-out run **failed entirely** — the provider returned HTTP 403 to all
+294 executions and never recovered. The reservation that run consumed was
+released under a rule added for the purpose: *a reservation may be released
+only if its artifact contains zero gradable records.* One graded task and it is
+spent permanently. Released reservations are superseded rather than deleted,
+and the failed artifacts are committed as evidence.
 
 ## Known limitations
 

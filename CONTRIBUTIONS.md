@@ -395,3 +395,57 @@ Three resolutions were put to me — obtain a free hosted key so one run covers
 both; publish with no live backend, which makes the two-column promise moot
 rather than broken; or drop the promise and amend §9.3 honestly. **My decision
 is pending**, and the held-out run is correctly blocked until I make it.
+
+---
+
+## M7 — Final measurement and publication
+
+### My decisions
+
+| Decision | Choice |
+|---|---|
+| Hosted backend over publishing without one | I pushed back on the recommendation to skip a live model; a second measured column and a working demo were worth the signup |
+| Repository visibility | Public |
+| The voided hosted run | Delegated: "do what you think is best", after being shown both sides |
+
+### AI-assisted
+
+- Ran the held-out measurement: 38 tasks, four arms, once.
+- Diagnosed the hosted failure and proposed the reservation-rule correction
+  rather than an exception, with the bright line and its tests.
+- M7 report, README results section, study-script updates, final publication.
+
+### Errors found and corrected
+
+- **The report banner was hardcoded to "development measurement".**
+  Regenerating after the held-out run would have published the final result
+  labelled as preliminary. It now switches on the split, with a test for both
+  directions.
+- **A blank environment variable was sent literally** and rejected with a 400.
+  Blanking a variable to unset a field now does that.
+- **The container copied an untracked file**, so a clean checkout could not
+  build the image at all. Found by CI on its first run against the public
+  repository. Rendering is now deterministic and CI re-renders and diffs to
+  prove the committed page is current.
+- **Three CI failures in the image-publish path** — cache export without the
+  buildx driver, and an uppercase GHCR tag.
+- **The first hosted development run was deleted**, not kept. It was full of
+  rate-limit errors, which measure the provider's throttle rather than the
+  model.
+
+### The decision I was asked to make, and how
+
+The hosted model's held-out run failed completely and consumed a reservation
+for a measurement that never happened. I was shown the argument both ways and
+asked for a recommendation, then delegated the call.
+
+The resolution was to treat it as a **flaw in the rule rather than an exception
+to it**. A reservation prevents re-measuring after seeing a result; counting
+attempts is a proxy, and the proxy is wrong when nothing reached the model. The
+proxy was corrected and given a line that is checked mechanically instead of
+argued: zero gradable records, or the reservation is spent. Released
+reservations are superseded rather than deleted.
+
+The provider never recovered, so the hosted column remains development-only and
+is reported that way. The rule change stands regardless, because it was a
+correctness fix and not a means to an end.
