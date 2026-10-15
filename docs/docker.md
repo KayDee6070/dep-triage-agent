@@ -53,6 +53,10 @@ docker run --rm -i --network none --read-only \
 Expected summary: `offline_smoke: passed`, UID 1000, 80 packages, three scripted
 development executions, zero live model calls, zero held-out executions.
 GitHub Actions runs this same check after building from its clean checkout.
+It also runs `python3 scripts/check_docker_context.py`: Docker must admit ten
+allowed synthetic paths and exclude sixteen harmless canaries, including
+environment files and non-Python files nested under `src`. This tests actual
+Docker ignore semantics, not a separately implemented pattern matcher.
 
 ## Live local smoke: Linux
 

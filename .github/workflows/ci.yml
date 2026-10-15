@@ -50,6 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify build-context exclusions with synthetic canaries
+        run: python3 scripts/check_docker_context.py
+
       - name: Build locked runtime image
         run: docker build --tag dep-triage-agent:ci .
 
