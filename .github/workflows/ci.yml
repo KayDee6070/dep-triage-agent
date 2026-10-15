@@ -44,6 +44,12 @@ jobs:
       - name: Tests
         run: uv run pytest
 
+      # The study script is prose whose every claim is asserted against the
+      # repository. Running it here means a documentation claim that stops
+      # being true fails the build instead of quietly misleading a reader.
+      - name: Study script claims still hold
+        run: uv run python scripts/study_the_harness.py
+
   container:
     runs-on: ubuntu-latest
     timeout-minutes: 10

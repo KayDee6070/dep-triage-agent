@@ -366,3 +366,32 @@ Full diagnosis and limits: [M4 report](docs/milestones/M4-report.md).
   shipping the report pre-rendered.
 - Earlier handoff wording of mine implied `deploy/azure.sh` already existed. It
   did not; M5 flagged that and M6 wrote it.
+
+---
+
+## M7 (in progress) — study script
+
+### AI-assisted
+
+- `scripts/study_the_harness.py`: twelve sections of prose where every claim is
+  verified against the repository as the script runs. 54 claims, computed from
+  artifacts rather than hardcoded, so a number that drifts fails the build.
+  Wired into CI.
+
+### Still owed in M7
+
+- Publish the Space and record the live URL (needs my Hugging Face account).
+- Decide the hosted-backend question below, then the single held-out run.
+- README and CONTRIBUTIONS final pass.
+
+### A sequencing conflict I was shown rather than left to discover
+
+M0 §9.3 promised the report carries two model columns so nothing on the public
+link is an unmeasured claim, and the held-out set runs exactly once. Those
+collide: measuring held-out now with only the local model means the hosted demo
+model can never be measured on held-out, and a second run is forbidden.
+
+Three resolutions were put to me — obtain a free hosted key so one run covers
+both; publish with no live backend, which makes the two-column promise moot
+rather than broken; or drop the promise and amend §9.3 honestly. **My decision
+is pending**, and the held-out run is correctly blocked until I make it.

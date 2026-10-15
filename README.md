@@ -429,6 +429,22 @@ development. The two exposed probes are excluded even with confirmation.
 
 ---
 
+## Study the project
+
+```bash
+uv run python scripts/study_the_harness.py
+```
+
+Twelve sections of prose explaining the design, the measured results, the bugs
+found, and what the project cannot claim — where **every statement is asserted
+against the repository as it runs**. 54 claims, checked against the frozen
+fixture, the committed task set, the saved evaluation artifacts and the code
+itself.
+
+Running it green is the proof that the explanation is true. A claim that stops
+matching reality fails loudly and names itself, rather than remaining a
+confident paragraph that quietly went wrong. CI runs it on every push.
+
 ## Deliberately out of scope
 
 A 5th tool · multi-agent or orchestration · vector DB / RAG · any web UI beyond
