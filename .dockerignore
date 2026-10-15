@@ -1,0 +1,15 @@
+# Default-deny: no .git, .env, caches, saved runs, tests, or model weights.
+**
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!src/
+!src/**/
+!src/**/*.py
+!data/
+!data/tasks.json
+!data/fixture/
+!data/fixture/*.json

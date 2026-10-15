@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 # A superseded run tells you nothing. Cancel it.
 concurrency:
   group: ci-${{ github.ref }}
@@ -40,3 +43,22 @@ jobs:
       # fixtures at M2 and replayed here.
       - name: Tests
         run: uv run pytest
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build locked runtime image
+        run: docker build --tag dep-triage-agent:ci .
+
+      - name: Offline container acceptance
+        # No model/network, root privileges, or writable root filesystem.
+        # Only /tmp is writable; the script is supplied over stdin.
+        run: |
+          docker run --rm --network none dep-triage-agent:ci version
+          docker run --rm -i --network none --read-only \
+            --tmpfs /tmp:rw,nosuid,noexec,size=64m \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --entrypoint python dep-triage-agent:ci - < scripts/smoke_container.py
