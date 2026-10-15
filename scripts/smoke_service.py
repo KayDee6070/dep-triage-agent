@@ -47,9 +47,15 @@ def main() -> int:
         fail(f"GET / returned {index.status_code}")
     if index.text == REPORT_UNAVAILABLE or len(index.text) < MIN_REPORT_BYTES:
         fail(f"GET / served a placeholder or truncated report ({len(index.text)} bytes)")
-    for marker in ("development measurement", "strictly more information"):
+    # Disclosures that must hold for either split. The banner itself differs by
+    # design -- a development run says so, a held-out run says it was executed
+    # once -- so asserting one wording here made this check fail the moment the
+    # final result was published.
+    for marker in ("strictly more information", "Split:"):
         if marker not in index.text:
             fail(f"report is missing required disclosure: {marker!r}")
+    if not any(banner in index.text for banner in ("development measurement", "Final measurement")):
+        fail("report states neither a development nor a final measurement banner")
     print(f"ok   GET /        {len(index.text):,} bytes, disclosures present")
 
     health = client.get("/health")

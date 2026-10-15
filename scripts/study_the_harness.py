@@ -103,7 +103,7 @@ def main() -> int:
         json.loads((REPO / "data" / "tasks.json").read_text(encoding="utf-8"))
     )
     truth: dict[str, GroundTruth] = {t.id: resolve(t, fixture) for t in task_set.tasks}
-    dev = json.loads((REPO / "results/m3-gates/run-1.metrics.json").read_text())
+    hosted_dev = json.loads((REPO / "results/dev-hosted.json").read_text())
     gates = json.loads((REPO / "results/m3-gates/gates.json").read_text())
     final = json.loads((REPO / "results/held-out-final.json").read_text())
     clean = final["metrics"]
@@ -560,6 +560,18 @@ def main() -> int:
         "task.question" not in (REPO / "src/dep_triage/eval/baselines.py").read_text()
         or "extract_pins" in (REPO / "src/dep_triage/eval/baselines.py").read_text(),
         "pins are regex-extracted from the question text",
+    )
+    hd = hosted_dev["metrics"]["systems"]
+    study.claim(
+        "the hosted comparison is development-only and labelled as such",
+        hosted_dev["split"] == "dev",
+        "its held-out run failed entirely; see section 13",
+    )
+    study.claim(
+        "a fifteen-times larger model raised the agent but raised the baseline too",
+        hd["agent"]["clean"]["correct"] < hd["no_agent"]["clean"]["correct"],
+        f"agent {hd['agent']['clean']['correct']}/20, "
+        f"no_agent {hd['no_agent']['clean']['correct']}/20 on development",
     )
     study.claim(
         "no_agent calls list_releases unfiltered, which is what 'no routing' means",
