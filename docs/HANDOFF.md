@@ -1,6 +1,6 @@
 # Handoff — read this first
 
-**Updated 2026-10-15 after M3 completion for a fresh assistant session.**
+**Updated 2026-10-15 after M4 completion for a fresh assistant session.**
 
 Repo: `/home/kuntal/Projects/active/dep-triage-agent`, branch `main`,
 Check `git status` for current commit/worktree state; do not infer it from this file.
@@ -12,13 +12,18 @@ remaining **38** once at the final stage. The old untouched-40 claim was false.
 Historical 18/20 dev results also predate the current allocation. Current
 measurements and source artifacts are in `docs/milestones/M3-report.md`.
 
-**Current next job: M4 diagnosis, dev only.** M3 is complete. Five clean repeats
+**Current next job: M5 Docker.** M3 and M4 are complete. Five clean repeats
 gave agent 16/20, no_agent 18–19/20, always_lookup 18/20. The baseline failed
 the byte-identical gate; three additional repeats and all-metric variance were
 recorded. The model-switch threshold did not trigger. The runtime actually used
 **4096 context tokens**, not the historical 8192. No model setting was changed
 to improve a result. The 90-run fault suite and corrected offline scoring are
-complete; both owed milestone reports now exist.
+complete; both owed milestone reports now exist. M4 used no new model runs:
+390 saved executions and 1,296 tool attempts audit clean. All four agent
+failures are explained in `docs/milestones/M4-report.md`; none justified
+changing the agent. Service defaults explain 4k; 782 matching journal prompts
+show no observed truncation. Baseline variability remains unexplained, with
+cache-state differences observed but not established as the cause.
 
 Read in this order: this file → `docs/milestones/M0-scope.md` (the contract) →
 `docs/findings-framing.md` (how results must be reported) → `README.md`.
@@ -134,7 +139,7 @@ explicitly, and he asked for it to apply to himself.
 
 ### For reference, not as pressure
 Started 2026-10-08. Five days passed with no commits (2026-10-10 to 10-15).
-M3 is complete; M4 through M7 remain. Remaining order of work is
+M4 is complete; M5 through M7 remain. Remaining order of work is
 in §11 — follow the order, ignore the dates.
 
 ## 4. Current state — what exists
@@ -146,10 +151,11 @@ in §11 — follow the order, ignore the dates.
 | M1 repo hygiene | ✅ green — CI, strict mypy, 18 s clone-to-green cold |
 | M2 agent | ✅ `dep-triage ask` works end to end on local Qwen3-8B |
 | M3 eval harness | ✅ complete — metrics, faults, CLI, gates, reports and saved evidence |
-| M4 measure / M5 Docker / M6 deploy / M7 docs | ❌ not started |
+| M4 development diagnosis | ✅ complete — saved-trace audit, four failure diagnoses, runtime investigation |
+| M5 Docker / M6 deploy / M7 docs | ❌ not started |
 
 ### Numbers
-**259 tests** · ruff clean · mypy `strict` clean on **41 files**.
+**267 tests** · ruff clean · mypy `strict` clean on **43 files**.
 
 ### Files that matter
 
@@ -623,18 +629,27 @@ used to correct the retry classifier.
 5. `docs/milestones/M3-report.md` and `M2-report.md` both exist. The latter
    contains the walkthrough verified against the installed framework source.
 
-### B. M4 — next job: diagnose, **dev only**
-Use saved M3 traces first. Current clean failures are `minsafe-02`, both dev
-deep probes, and `pyupgrade-02`. The older gradio example is not the current
-dev minimum-safe task. Fault traces additionally show failed lookups treated
-as clean or unknown, and two wrong-package version claims from always_lookup.
-Diagnose the 4k runtime discrepancy and preserve the measured baseline variance;
-do not silently rewrite M3 as deterministic or as an 8k measurement.
+### B. M4 completed — diagnosis, **dev only**
 
-Legitimate fixes: tool descriptions, genuine bugs. **Not** legitimate: prompt
-changes aimed at raising a score.
+`docs/milestones/M4-report.md` and `results/m4-diagnosis.json` explain all four
+clean agent failures: Django answers a downgrade; both deep probes search down
+from newest without filtering and exhaust the budget; pymongo checks the pin's
+compatibility rather than the upgrade target. Tools and metrics replay exactly.
+Faults expose unsupported verdicts and two wrong-package version claims.
 
-### C. M5 Docker · D. M6 deploy · E. M7 docs
+`scripts/diagnose_dev.py` reproduces the offline audit, with no model calls.
+`results/m4-runtime.json` records the service's missing context override and
+782 journal prompts matching saved usage at 4k. No truncation was observed.
+The baseline's changing answer has identical reconstructed inputs but different
+cache reuse; the cause is not proven. Its reproducibility gate remains failed.
+
+No prompt, model-facing description, tool implementation, baseline algorithm,
+task, fixture, or runtime setting changed. Only internal documentation errors
+were corrected. Do not repeat development runs just to improve the result.
+Before eventual local final measurement, verify actual context/model/runtime;
+do not silently substitute 8k for the measured 4k condition.
+
+### C. M5 Docker — next job · D. M6 deploy · E. M7 docs
 - Deploy target: **Hugging Face Spaces (Docker SDK)**. Chosen for survivability
   — no card, no billing, cannot silently die. Railway/Render/Fly rejected.
 - Landing page is the **static eval report**, not the live agent. The live

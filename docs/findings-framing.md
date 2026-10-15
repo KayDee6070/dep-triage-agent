@@ -78,6 +78,15 @@ such conditions, each structurally motivated rather than chosen to flatter:
 
 Cost is reported as a first-class number, not a footnote.
 
+**M4 clarification, 2026-10-15:** the cost row above uses historical tool-call
+counts, not measured total cost. On the current first clean run the agent uses
+64 tool attempts versus 111 for `no_agent`, but 83 model calls versus 20.
+Summed input usage is 105,332 versus 37,588 tokens, with substantially different
+cache reuse. Neither tool counts nor aggregate tokens alone establish total
+cost savings. Report those quantities separately; do not turn the earlier
+metered-API argument into an unmeasured cost finding. See
+[M4-report](milestones/M4-report.md#tool-savings-do-not-establish-total-cost-savings).
+
 ### A baseline bug this analysis found
 
 `no_agent` was calling `list_releases(name, since_version=version)`. Passing a

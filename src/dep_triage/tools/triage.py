@@ -149,10 +149,10 @@ def lookup_vulnerabilities(fixture: Fixture, package: str, version: str) -> Vuln
 
     * ``package_unknown`` — we hold no data. The answer is "unknown", never
       "not vulnerable".
-    * ``version_unknown`` — the package is known but this version was never
-      published. ``django==4.2.0`` looks plausible and does not exist; ``4.2``
-      does, and carries 96 advisories. Answering "not vulnerable" for a version
-      that never shipped is wrong in a way that matters.
+    * ``version_unknown`` — the package is known, but no semantically equal
+      published release or matching advisory exists. ``django==4.2.0`` and
+      ``django==4.2`` are the same PEP 440 version, not an unknown/known pair.
+      Answering "not vulnerable" for a genuinely absent version is wrong.
     * ``ok`` with no advisories — genuinely clean.
 
     Advisories are checked **before** the published-version test, deliberately.

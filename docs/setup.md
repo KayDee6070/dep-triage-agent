@@ -81,6 +81,16 @@ ollama pull qwen3:8b   # 5.2 GB
 
 RTX 4070 Laptop GPU, 8188 MiB total, 7.4 GiB reported available to Ollama.
 
+**Current evaluation condition, verified 2026-10-15:** M3 ran at **4,096
+context tokens**, not 8,192. The user service above has no context override;
+neither the model parameters nor the OpenAI-compatible client supplies one.
+The historical measurements below compare 4k and 8k, but do not establish
+a persistent 8k service configuration. M4 matched 782 journal prompts to the
+saved model usage and found no observed truncation. See the
+[runtime diagnosis](milestones/M4-report.md#runtime-context-4k-was-real-overflow-was-not-observed).
+Do not increase context to improve an eval score or silently describe the old
+results as 8k. Verify the actual allocation before future final measurement.
+
 | Measurement | Value |
 |---|---|
 | Throughput, warm | **44.9 tok/s** (3 runs: 44.4, 44.9, 44.9) |
@@ -94,11 +104,11 @@ so the 20–30 minute estimate for a 60-task run stands.
 
 8k context fits with ~1.2 GiB spare, which is what M0 scope §7 predicted.
 
-The determinism result is encouraging but **not** the day-5 reproducibility
-gate (M0 scope §6). That gate checks whether two full dev-subset runs produce
-identical *metrics*, which involves tool calls, step accounting, and a much
-longer context. One greedy generation matching itself is a precondition, not
-the test.
+The three matching hardware-test outputs were **not** the day-5 reproducibility
+gate (M0 scope §6). M3 subsequently ran that gate: agent and `always_lookup`
+passed, `no_agent` failed. Three additional complete repeats and variance are
+preserved in the [M3 report](milestones/M3-report.md). Temperature 0 and seed
+42 did not make all development metrics deterministic.
 
 ### Qwen3 reasons by default, and it dominates runtime
 

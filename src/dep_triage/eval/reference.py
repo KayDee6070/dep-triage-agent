@@ -21,8 +21,8 @@ necessity. The earlier framing ("minimal necessary tool set") claimed more than
 the mechanism proves, and the baselines are what exposed it.
 
 ``Evidence`` reads the fixture **completely**, not through the agent-facing
-tools. Those cap their output (10 advisories, 60 versions) to fit an 8k
-context; ground truth must not inherit a limit that exists for the agent's
+tools. Those cap their output (10 advisories, 60 versions) to limit context
+use; ground truth must not inherit a limit that exists for the agent's
 benefit. The separate obligation — that the answer is still *reachable* through
 the capped tools — is enforced by the task builder, not here.
 """
@@ -103,11 +103,11 @@ class GroundTruth(BaseModel):
     expected_names: list[str] | None = None
     expected_bool: bool | None = None
 
-    #: Minimal necessary tools, derived. ``tool_recall`` is scored against this.
+    #: Derived reference tool set, not a proof of necessity. D1 uses this set.
     required_tools: list[str] = Field(default_factory=list)
 
-    #: Fewest tool calls that could answer the question. The denominator for
-    #: D3's ``over_call_ratio``.
+    #: Reference call-count proxy, not a proven minimum. The denominator for
+    #: D3's ``over_call_ratio``; the historical field name is retained.
     oracle_calls: int = 0
 
     #: Plain-English statement of the answer, for traces and the report.
@@ -117,9 +117,9 @@ class GroundTruth(BaseModel):
 def lowest_clean_version(evidence: Evidence, package: str, floor: str | None = None) -> str | None:
     """Lowest published version at or above ``floor`` with no advisory.
 
-    Both tools are genuinely required: an advisory's ``fixed`` boundary is not
-    always a version that shipped, so answering from advisories alone names
-    versions nobody can install.
+    The reference checks both publication and advisories. Fix boundaries often
+    suffice on these tasks, but they do not in general establish that a version
+    shipped or that all advisories are resolved. This is not a minimality proof.
     """
     for version in evidence.published_versions(package):
         if floor is not None and sort_key(version) < sort_key(floor):

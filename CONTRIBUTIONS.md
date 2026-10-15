@@ -1,7 +1,7 @@
 # Contributions
 
 This repository was built with AI assistance (initial work with Claude Opus 5
-via Claude Code; M3 completion with Codex).
+via Claude Code; M3 completion and M4 diagnosis with Codex).
 This file separates the decisions I made from the work that was AI-assisted and
 from external review, so that nothing in the repository is ambiguous about its
 origin.
@@ -171,6 +171,9 @@ curation, which was the point of reviewing at this moment:
   Advisories are checked first, because 2175 version strings in the snapshot
   are named by an advisory but no longer listed on the index; testing
   publication first would have hidden every one of them.
+  **Later correction:** the Django example above was wrong: 4.2 and 4.2.0
+  are semantically equal under PEP 440. The implementation was repaired before
+  M3 measurement; M4 also removed the surviving incorrect internal docstring.
 - **Two self-inflicted shell mistakes.** `pgrep -f` / `pkill -f` match the
   agent's own command line and killed the session twice. `pgrep -x` is the
   correct form; recorded in memory.
@@ -246,3 +249,47 @@ curation, which was the point of reviewing at this moment:
   corrected metrics were computed from saved traces without model reruns.
 
 Full measurements and remaining limitations: [M3 report](docs/milestones/M3-report.md).
+
+---
+
+## M4 — Development diagnosis, 2026-10-15
+
+### My decisions
+
+- Requested M4 continuation under the existing no-tuning and held-out rules.
+- The earlier publication rule remains binding: the agent is not optimised
+  until it wins, and no additional task or model run is owed merely because
+  the observed result is weak.
+
+### AI-assisted
+
+- Diagnosed all four recurring clean failures from saved traces and fixture
+  queries: downgrade below a requested floor, two newest-first searches that
+  exhaust the budget, and compatibility checked on the wrong version.
+- Examined fault answers, including correct labels without supporting tool
+  evidence and two confirmed wrong-package version assertions.
+- Built an offline audit: 390 saved executions, 1,296 recorded tool attempts,
+  all ground truths, grades, and metric bytes verified without new inference.
+- Investigated the actual 4k context: no service/model/client override, 782
+  journal prompts matching saved token usage, no observed truncation. Preserved
+  the distinction between historical 8k hardware tests and M3's runtime.
+- Reconstructed the changing baseline input, observed different cache reuse,
+  and explicitly left causation unresolved. The reproducibility failure stays.
+- Reported model calls and token usage alongside tool counts, without making
+  an unsupported total-cost claim. Added eight regression tests and M4 report.
+
+### Errors found and corrected
+
+- **Internal documentation:** a tool docstring still denied the semantic
+  equality of Django 4.2 and 4.2.0; reference comments claimed proven minimality.
+  Corrected prose only. Model-facing descriptions and execution were unchanged.
+- **This assistant's analysis error:** reconstructing prompts directly from
+  sorted artifact JSON changed payload key order. A capture-model test exposed
+  the mismatch. Replaying and validating deterministic tool outputs preserves
+  the original order. No reported model result was changed.
+- **This assistant's audit assumption:** a whole-file hash check rejected the
+  agent file because its explanatory docstring changed after measurement.
+  The revised check verifies the unchanged baseline implementation; input
+  reconstruction is explicitly distinguished from captured HTTP evidence.
+
+Full diagnosis and limits: [M4 report](docs/milestones/M4-report.md).

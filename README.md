@@ -9,15 +9,22 @@ harness that measures whether it actually works.**
 
 | | |
 |---|---|
-| **State** | **M3 complete** — 300 clean dev executions plus 90 fault executions; final held-out measurement deferred |
+| **State** | **M4 complete** — development diagnosis finished without tuning; M5 Docker next |
 | Schedule | No deadline; the six definition-of-done criteria are the stopping line |
-| Tests | Offline pytest suite, ruff, and strict mypy; measured counts in the M3 report |
+| Tests | 267 offline tests; ruff clean; strict mypy on 43 files |
 | Clone to green | **18 s** cold cache (budget 60 s) |
 | Fixture | 80 packages, 1487 advisories, snapshot 2026-10-09 |
-| Results | Development results in [M3 report](docs/milestones/M3-report.md); no final result yet |
+| Results | [M3 measurements](docs/milestones/M3-report.md), [M4 diagnosis](docs/milestones/M4-report.md); no final result yet |
 
 The JSON harness, both baselines, fault suite, and held-out guard work. The
 static HTML report, Docker image, and deployed service are later milestones.
+
+Current development accuracy: agent **16/20**, `no_agent` **18–19/20**,
+`always_lookup` **18/20**. All 390 saved executions audit clean. M4 diagnoses
+the failures without changing the agent or rerunning the model. Lower tool
+counts do not establish total cost savings: the first clean run used 83 model
+calls for the agent versus 20 per baseline. The actual runtime was 4k, and
+`no_agent` failed the reproducibility gate; both limitations remain disclosed.
 
 **Exposure disclosure:** the original allocation remains 20 dev / 40 held-out,
 but two held-out deep probes already had published results. With the owner's

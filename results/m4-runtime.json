@@ -1,0 +1,55 @@
+{
+  "observed_on": "2026-10-15",
+  "model_executions": 0,
+  "ollama_version": "0.40.1",
+  "service": {
+    "unit": "/home/kuntal/.config/systemd/user/ollama.service",
+    "exec_start": "%h/.local/bin/ollama serve",
+    "drop_ins": [],
+    "context_environment_override": null,
+    "parallelism_environment_override": null,
+    "startup_reported_context_setting": 0,
+    "startup_reported_parallelism": 1
+  },
+  "model": {
+    "name": "qwen3:8b",
+    "num_ctx_parameter": null,
+    "metadata_context_length": 40960,
+    "loaded_at_diagnosis": false,
+    "measured_runtime_context_length": 4096,
+    "measured_runtime_source": "results/m3-runtime.json and runner journal"
+  },
+  "client_context_override": null,
+  "journal": {
+    "command": "journalctl --user -u ollama.service --since '2026-10-15 00:00:00' --no-pager",
+    "row_filter": "contains 'new prompt' or 'stop processing: n_tokens'",
+    "matching_rows": 1564,
+    "ordered_rows_sha256": "66b53db93d5df21d5b0cf5fb4e537aa5953dfb9fc4f30fee52cb3401277b6a57",
+    "first_row": "Oct 15 13:45:43 kuntal ollama[3363]: slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 627",
+    "last_row": "Oct 15 13:58:33 kuntal ollama[3363]: slot      release: id  0 | task 24266 | stop processing: n_tokens = 618, truncated = 0",
+    "prompt_count": 782,
+    "release_count": 782,
+    "distinct_prompt_context_lengths": [4096],
+    "saved_assistant_usage_count": 782,
+    "prompt_token_counts_match_saved_usage_in_execution_order": true,
+    "max_prompt_tokens": 3995,
+    "max_release_n_tokens": 4018,
+    "nonzero_truncated_release_count": 0,
+    "truncating_log_matches": 0,
+    "context_shift_log_matches": 0,
+    "saved_usage_order": [
+      "results/m3-gates/run-1.json",
+      "results/m3-gates/run-2.json",
+      "results/m3-gates/run-3.json",
+      "results/m3-gates/run-4.json",
+      "results/m3-gates/run-5.json",
+      "results/m3-faults-rescored.json"
+    ]
+  },
+  "interpretation": "No observed context truncation. Counts and logs do not establish the model's internal reasoning or prove that every input byte was processed.",
+  "runtime_changed": false,
+  "documentation": [
+    "https://docs.ollama.com/context-length",
+    "https://docs.ollama.com/api/openai-compatibility"
+  ]
+}
