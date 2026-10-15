@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import html
 import json
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -284,14 +283,15 @@ def _fabrication(clean: dict[str, Any]) -> str:
     return table + caveat
 
 
-def render(
-    clean: dict[str, Any],
-    faults: dict[str, Any] | None = None,
-    *,
-    generated_at: datetime | None = None,
-) -> str:
-    """Build the full report page from evaluation run artifacts."""
-    stamp = (generated_at or datetime.now(UTC)).strftime("%Y-%m-%d %H:%M UTC")
+def render(clean: dict[str, Any], faults: dict[str, Any] | None = None) -> str:
+    """Build the full report page from evaluation run artifacts.
+
+    **Deterministic**: the same artifacts always produce byte-identical HTML.
+    There is no build timestamp, deliberately. A wall-clock stamp on a static
+    page adds nothing a reader needs — the measurement's own identity is what
+    matters — and it made the committed page impossible to verify, because
+    re-rendering to check for staleness always differed.
+    """
     provenance = clean.get("provenance", {})
     settings = provenance.get("settings", {})
     split = clean.get("split", "unknown")
@@ -402,7 +402,8 @@ def render(
 
     sections.append(
         "<footer>"
-        f"Generated {_esc(stamp)} from committed evaluation artifacts. "
+        f"Rendered from committed evaluation artifacts for the "
+        f"<code>{_esc(split)}</code> split. "
         f"Model <code>{_esc(settings.get('llm_name', 'unknown'))}</code>, "
         f"temperature {_esc(settings.get('llm_temperature', '?'))}, "
         f"seed {_esc(settings.get('llm_seed', '?'))}, "

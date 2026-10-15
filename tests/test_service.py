@@ -393,3 +393,38 @@ def test_report_still_serves_without_a_fixture(monkeypatch: pytest.MonkeyPatch) 
     assert health["live_agent_available"] is False
     assert health["report_available"] is True
     assert test_client.post("/ask", json={"question": "Is x==1.0.0 vulnerable?"}).status_code == 503
+
+
+def test_report_rendering_is_deterministic(clean_run: dict[str, Any]) -> None:
+    """Byte-identical output from identical artifacts.
+
+    Load-bearing rather than cosmetic: the container copies the committed
+    report, so CI proves that copy is current by re-rendering and diffing. A
+    build timestamp would make that check impossible, which is why there is
+    none.
+    """
+    assert render(clean_run) == render(clean_run)
+
+
+def test_report_contains_no_build_timestamp(clean_run: dict[str, Any]) -> None:
+    import datetime as dt
+
+    html = render(clean_run)
+    today = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d")
+    # The snapshot date may legitimately appear; today's date must not.
+    if today != clean_run.get("provenance", {}).get("settings", {}).get("snapshot_date"):
+        assert f"Rendered {today}" not in html
+    assert "UTC</" not in html
+
+
+def test_committed_report_is_current() -> None:
+    """The published page must match the artifacts it claims to come from."""
+    committed = REPO_ROOT / "results" / "report.html"
+    if not committed.is_file():
+        pytest.skip("no committed report")
+    from dep_triage.service.report import render_from_paths
+
+    expected = render_from_paths(CLEAN_RUN, FAULT_RUN)
+    assert committed.read_text(encoding="utf-8") == expected, (
+        "results/report.html is stale; run: uv run dep-triage report --output results/report.html"
+    )

@@ -50,6 +50,14 @@ jobs:
       - name: Study script claims still hold
         run: uv run python scripts/study_the_harness.py
 
+      # The image copies the committed report, so a stale copy would publish
+      # numbers that no longer match the artifacts. Rendering is deterministic,
+      # so re-rendering and diffing proves the committed page is current.
+      - name: Committed report matches the evaluation artifacts
+        run: |
+          uv run dep-triage report --output results/report.html
+          git diff --exit-code -- results/report.html
+
   container:
     runs-on: ubuntu-latest
     timeout-minutes: 10

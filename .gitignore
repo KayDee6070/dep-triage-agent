@@ -19,7 +19,12 @@ dist/
 htmlcov/
 
 # Generated artifacts
-results/
+results/*
+# ...except the rendered report. It is the page that actually gets published,
+# the image build copies it, and versioning it means the published artifact is
+# reviewable and its history visible. Rendering is deterministic and CI
+# re-renders to prove this copy is not stale.
+!results/report.html
 data/.held-out-runs/
 reports/
 *.gguf
