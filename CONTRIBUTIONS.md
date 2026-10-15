@@ -1,6 +1,7 @@
 # Contributions
 
-This repository was built with AI assistance (Claude Opus 5, via Claude Code).
+This repository was built with AI assistance (initial work with Claude Opus 5
+via Claude Code; M3 completion with Codex).
 This file separates the decisions I made from the work that was AI-assisted and
 from external review, so that nothing in the repository is ambiguous about its
 origin.
@@ -192,3 +193,56 @@ curation, which was the point of reviewing at this moment:
 - Proposed and recorded the replacement: the six-point definition of done
   becomes the stopping line, and the scope exclusions hold regardless of
   available time.
+
+---
+
+## M3 completion — 2026-10-15
+
+### My decisions
+
+- Approved the exposure correction after the audit found that two current
+  held-out probes already had published model results. Keep all 60 records,
+  never rerun those two, and evaluate the remaining 38 once. Do not manufacture
+  replacement tasks.
+- Reaffirmed that quality takes priority over schedule, that the harness is
+  the deliverable, and that weak or negative results must be reported.
+
+### AI-assisted
+
+- Implemented deterministic suite selection, injected fault runs, JSON traces
+  and checkpoints, accuracy and D1/D2/D3 metrics, exact paired McNemar tests,
+  fabrication lower bounds, version-answer columns, and a guarded eval CLI.
+- Added an executable three-system reproducibility/model-switch gate and
+  offline regression tests. Ran the development and fault suites locally.
+- Wrote the measurement protocol before live runs and completed the overdue
+  M2/M3 reports. Inspected the installed LangGraph source for the walkthrough.
+- Corrected claims that exhaustive fixed calls necessarily provide a strict
+  information superset, that zero discordances prove equivalence, and that
+  the historical 18/20 score describes the current development allocation.
+
+### Errors found and corrected
+
+- **Prior AI/reporting error:** `minsafe-deep-03` and `minsafe-deep-04` were
+  already measured despite being described as untouched held-out data. The
+  result table and commit message supplied the evidence. The correction was
+  escalated to Kuntal before changing the measurement contract.
+- **Framework integration error:** the assumed ToolNode exception handling
+  did not match the pinned version. An offline retry test first failed with
+  `error:ToolError`; an explicit handler now surfaces injected failures without
+  changing the prompt, tool data, or baseline algorithms.
+- **Instrumentation race:** an offline parallel-call test executed seven
+  calls with a budget of two. Atomic bookkeeping now enforces the budget and
+  unique trace indices. Unexpected implementation errors are recorded too.
+- **Grader bug:** semantic version aliases were treated as distinct answers,
+  and the regex truncated post/dev/local releases. Complete PEP 440 extraction
+  and semantic deduplication repair those cases without tuning model outputs.
+- **Grader bug:** filtering unknown names out of a structured set answer could
+  turn an invented package into a correct empty set. Explicit extra names now
+  fail the set comparison; unreadable prose is ungradable. All five saved clean
+  runs were regraded offline and their metric bytes remained identical.
+- **My assistant's M3 classifier error:** the initial retry classification
+  counted later calls with different arguments as retries. The corrected rule
+  requires identical signatures. Original fault artifacts remain available;
+  corrected metrics were computed from saved traces without model reruns.
+
+Full measurements and remaining limitations: [M3 report](docs/milestones/M3-report.md).

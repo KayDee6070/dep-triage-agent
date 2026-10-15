@@ -3,6 +3,16 @@
 **Status:** agreed 2026-10-07 · **revised 2026-10-07** after senior engineer review
 **Rule for this milestone:** decisions only, no code.
 
+**Amended 2026-10-15 with Kuntal's approval:** two originally held-out deep
+probes were already measured in commit `0dd1cd2`. Keep the original 60 records
+and 20/40 assignments, but never execute `minsafe-deep-03` or `minsafe-deep-04`
+again. Report those as historical examples and measure the remaining **38**
+held-out tasks once, alongside both baselines. No replacement tasks. References
+below to a pristine 40-task final run are superseded by this amendment and
+[`M3-protocol.md`](M3-protocol.md), which fixes metric denominators and fault
+selection before the completed harness is run. Historical dev 18/20 predates
+the allocation change and is not the current task set's score.
+
 Revision history is at §16. Everything below is the current plan.
 
 ---
@@ -15,7 +25,7 @@ Revision history is at §16. Everything below is the current plan.
 | Tools | 4 (`parse_requirements`, `lookup_vulnerabilities`, `list_releases`, `check_compatibility`) |
 | Task set | 60 tasks, **split 20 dev / 40 held-out, declared before any measurement** |
 | Primary metric | **End-to-end answer accuracy.** The three required metrics are diagnostics that explain it. |
-| Baselines | **`no-agent` (call everything) and `always-lookup`** — same 40 held-out tasks, same determinism bar |
+| Baselines | **`no-agent` (call everything) and `always-lookup`** — same 38 final tasks, same determinism bar |
 | Agent vs baseline | **Paired**: wins/ties/losses + discordant-pair count + McNemar exact |
 | Fabrication | **Two denominators** — per assertion (headline) and per task |
 | Reporting | **Tiered by claim type** — existence / comparison / rate |
@@ -94,7 +104,7 @@ slow, the corpus shrinks and the design survives.
 | 1 | `parse_requirements(text)` | `[(name, pinned_version), …]` |
 | 2 | `lookup_vulnerabilities(pkg, version)` | OSV records, or one of three distinct negatives (§3.6) |
 | 3 | `list_releases(pkg, since_version=None)` | published versions at or above a floor |
-| 4 | `check_compatibility(pkg, version)` | `requires_python` + declared deps |
+| 4 | `check_compatibility(pkg, version, python_version)` | compatibility verdict, `requires_python`, declared deps |
 
 The tools are deliberately **non-substitutable**. Each question class needs a
 different subset, so tool-selection accuracy measures something real rather
@@ -114,18 +124,20 @@ reported result.
 
 | Class | Total | Dev | Held-out | Required tools | Correct answer |
 |---|---|---|---|---|---|
-| Is `pkg==X` vulnerable? — affected | 10 | 3 | 7 | 2 | yes + CVE set |
+| Is `pkg==X` vulnerable? — affected | 8 | 2 | 6 | 2 | vulnerable verdict |
 | Is `pkg==X` vulnerable? — known, zero advisories | 6 | 2 | 4 | 2 | **not vulnerable** |
 | Unpublished version — **abstention probe** | 6 | 2 | 4 | 2 | **that version never shipped** |
 | Unknown package — **abstention probe** | 6 | 2 | 4 | 2 | **unknown** |
-| Minimum safe version? | 10 | 3 | 7 | 2, 3 | version string |
+| Minimum safe version? | 8 | 2 | 6 | 2, 3 | version string |
+| Deep minimum-safe existence probe | 4 | 2 | 2 exposed | 2, 3 | version; traces only |
 | Which packages in this file are vulnerable? | 8 | 3 | 5 | 1, 2 | set of names |
 | Can I upgrade on Python `N`? | 8 | 2 | 6 | 2, 3, 4 | bool + reason |
 | Direct CVE lookup — **over-call probe** | 6 | 3 | 3 | 2 | affected ranges |
 | **Total** | **60** | **20** | **40** | | |
 
-Both halves cover all six classes, so the dev subset is representative and the
-held-out set isn't measuring something the dev set never saw.
+The original assignments cover all nine classes. After the approved exposure
+exclusion, the remaining 38 final tasks cover eight; the two deep probes are
+historical examples only.
 
 Four classes exist to catch specific failures rather than to measure general
 competence:
@@ -133,9 +145,9 @@ competence:
 - **Known, zero advisories.** 25 of the 80 packages carry no advisories at all.
   The correct answer is "not vulnerable" — a positive claim, distinct from
   "unknown".
-- **Unpublished version.** The package is known; the version never shipped.
-  `django==4.2.0` looks entirely plausible and does not exist, while `4.2` does
-  and carries 96 advisories. See §3.6.
+- **Unpublished version.** The package is known; no PEP 440-equal version is
+  published or named by an advisory. The old `django==4.2.0` example was wrong:
+  it equals `4.2` semantically. See §3.7.
 - **Unknown package.** No data at all. The only correct answer is "unknown".
 - **Over-call probe.** The question needs exactly one tool and no parsing. An
   agent that calls `parse_requirements` here is over-calling, which feeds D3.
@@ -152,13 +164,15 @@ failure mode.
 
 ### 3.5 Ground truth
 
-Computed once by a reference script reading the same frozen snapshot, stored
-alongside each task. Scoring is exact comparison (string, bool, or set
-equality). No LLM judge — see §10.2.
+Computed at evaluation time by a resolver reading the same frozen snapshot.
+Task records store question parameters, not answers. Results preserve the
+computed truth with each trace. Scoring compares semantic versions, labels,
+booleans, or name sets; unreadable answers remain ungradable. No LLM judge.
 
-**The reference script also derives the minimal necessary tool set, for free.**
-Whichever fixture tables the script had to read to produce the answer determine
-which tools are necessary. No hand-labelling, and no opinion involved.
+The resolver derives its reference tool path from the fixture accessors it
+uses. The baselines demonstrated shorter correct paths, so this is not proof
+of a minimal necessary set. The M3 protocol supersedes the earlier stronger
+wording.
 
 ### 3.6 Three negatives, not one
 
@@ -198,8 +212,9 @@ As raw strings they were a trap, not an asset.
 
 ### 4.1 Primary metric
 
-**`task_accuracy`** — fraction of tasks whose final answer exactly matches
-ground truth.
+**`task_accuracy`** — correct / gradable answers, with correct, incorrect,
+ungradable, and total counts visible. Also report correct / total as an
+observed-success lower bound; never silently score unreadable answers wrong.
 
 This is the headline. The three diagnostic families below **explain** it; they
 are not peers of it. 90% tool selection with 40% task accuracy is a
@@ -230,11 +245,12 @@ can see which case they are looking at, rather than having to infer it.
 
 ### 4.2 D1 — tool selection
 
-Scored against the **minimal necessary** set derived in §3.5.
+Scored against the **reference path** derived by the resolver. The baselines
+exposed shorter valid paths; this is not proof of minimality.
 
 | Metric | Definition | Status |
 |---|---|---|
-| `tool_recall` | \|called ∩ necessary\| / \|necessary\| | **Hard requirement.** Below 1.0 means the agent answered without the information it needed — it guessed. |
+| `tool_recall` | \|called ∩ reference\| / \|reference\| | Reference-path agreement; below 1.0 does not prove guessing. |
 | `tool_precision` | \|called ∩ necessary\| / \|called\| | **Soft.** Extra calls are waste, not error. |
 | `first_call_accuracy` | fraction where the first tool called is the expected one (determinate tasks only) | Reported |
 | `no_tool_discipline` | on tasks needing no tool, fraction calling zero tools | Reported |
@@ -298,8 +314,8 @@ questions and have very different precision:
 
 | Rate | Denominator | Reading |
 |---|---|---|
-| `fabrication_per_assertion` | every version string and advisory ID asserted | **The headline.** Large n, tight interval. |
-| `fabrication_per_task` | fault-injected tasks producing ≥1 fabrication | Wide interval at n=20–60, but it is the number a reader intuitively wants. |
+| `fabrication_per_assertion` | distinct extracted version/advisory assertions | **The headline lower bound.** Assertions within a task are dependent. |
+| `fabrication_per_task` | all tasks in the reported arm; numerator has ≥1 detected fabrication | Often a wide interval, but it is the number a reader intuitively wants. |
 
 A single task can assert a dozen versions, so the per-assertion rate has far
 more statistical weight while the per-task rate is the one people reason about.
@@ -703,15 +719,31 @@ Not "polished". Done when all six hold:
 
 1. The public link works.
 2. The agent runs in Docker from a clean checkout.
-3. The harness produces a measured result on the **held-out 40** — good or bad
-   — alongside both baselines.
+3. The harness produces a measured result on the **remaining held-out 38** —
+   good or bad — alongside both baselines; the two exposed probes are disclosed
+   separately as historical examples.
 4. A study script explains it, with every claim backed by an assertion.
 5. Every milestone ended green: tests pass, linter clean, committed.
-6. The held-out set was measured **once**.
+6. Each of the 38 final tasks is measured **once per declared system/arm**;
+   neither exposed probe is rerun. The earlier exposure is disclosed.
 
 ---
 
 ## 16. Revision history
+
+### 2026-10-15 — exposure correction approved by Kuntal
+
+The cold-start audit matched the redis and certifi results in
+`findings-framing.md` to `held_out` records in `data/tasks.json`. Commit
+`0dd1cd2` explicitly records running all four deep probes. The untouched-40
+claim was therefore false. Kuntal approved preserving the data, excluding the
+two exposed probes from future execution, publishing their historical results
+separately, and evaluating the remaining 38 once. The previous 18/20 score
+also predates the allocation revision. No tasks were substituted or rewritten.
+
+M3-protocol fixes remaining operational definitions: accuracy among gradable
+answers plus coverage, paired exclusions, conditional fault denominators,
+undefined metrics, semantic version buckets, and fabrication lower bounds.
 
 ### 2026-10-15 — deadline withdrawn by Kuntal
 

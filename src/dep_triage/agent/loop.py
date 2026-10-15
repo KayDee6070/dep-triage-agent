@@ -6,32 +6,15 @@ supplies the graph; everything the harness needs is read off the
 That separation is the M0 scope §10 commitment: removing LangGraph later must
 not invalidate a measured number.
 
-What ``create_react_agent`` actually builds — required by M0 scope §10, so the
-design can be defended rather than cargo-culted:
+The verified framework walkthrough is in ``docs/milestones/M2-report.md``.
+In the default v2 graph, the agent dispatches tool calls via Send, then consumes
+their results on its next turn. No tool calls means END. Message IDs can replace
+prior messages; the state is not unconditionally append-only.
 
-1. A two-node ``StateGraph`` over a message list: ``agent`` (one model call)
-   and ``tools`` (a ``ToolNode`` executing every ``tool_call`` in the last
-   message, in parallel).
-2. ``START -> agent``. Then a conditional edge off ``agent``: if the last
-   message carries ``tool_calls``, route to ``tools``; otherwise ``END``.
-3. ``tools -> agent`` unconditionally. That back-edge is the loop, and it is
-   the only cycle in the graph.
-4. State is append-only — each node returns messages that are added via an
-   ``add_messages`` reducer, so nothing is overwritten and the full trace
-   survives.
-5. There is **no built-in step limit**. The only brake LangGraph provides is
-   ``recursion_limit`` on the invoke config, which counts *node visits*, not
-   tool calls.
-6. On hitting ``recursion_limit`` LangGraph v1 does **not** raise — it returns
-   a canned assistant message (:data:`RECURSION_SENTINEL`) and reports a
-   normal finish. Measured, not assumed: a test asserts that string still
-   appears, so a LangGraph upgrade that changes it fails loudly instead of
-   silently scoring every truncated run as a clean termination.
-
-Because of (6), the toolkit's call budget is sized to bite *before*
-``recursion_limit`` does, and that budget is what D3 reports against.
-``recursion_limit`` is left only as a backstop for a model that loops without
-calling tools at all, which the budget cannot see.
+Toolkit enforces the tool-call budget. Graph recursion_limit counts graph steps,
+not tool calls, and is the backstop if the model keeps requesting refused calls.
+The prebuilt agent can emit RECURSION_SENTINEL before graph exhaustion; the
+graph can also raise GraphRecursionError. Both are non-termination outcomes.
 """
 
 from __future__ import annotations
@@ -46,12 +29,13 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import StructuredTool
 from langchain_openai import ChatOpenAI
 from langgraph.errors import GraphRecursionError
-from langgraph.prebuilt import create_react_agent
+from langgraph.prebuilt import ToolNode, create_react_agent
+from langgraph.prebuilt.tool_node import ToolInvocationError
 
 from dep_triage.config import Settings
-from dep_triage.tools.wrapper import ToolCallRecord, Toolkit
+from dep_triage.tools.wrapper import ToolCallRecord, ToolError, Toolkit
 
-#: LangGraph v1 emits this instead of raising when ``recursion_limit`` is hit.
+#: The prebuilt agent emits this when too few graph steps remain for tools.
 #: Internal to LangGraph and therefore version-fragile, which is why
 #: ``test_recursion_sentinel_is_still_current`` pins it.
 RECURSION_SENTINEL = "Sorry, need more steps to process this request."
@@ -159,6 +143,21 @@ def _final_text(messages: list[BaseMessage]) -> str:
     return ""
 
 
+def _tool_error_message(exc: Exception) -> str:
+    """Surface injected failures while preserving LangGraph's validation handling.
+
+    The pinned ToolNode default only handles ToolInvocationError, despite the
+    original assumption that arbitrary tool exceptions reached the model. An
+    injected 503 must be visible before recovery can be measured. Unexpected
+    implementation errors still propagate and become recorded crashes.
+    """
+    if isinstance(exc, ToolError):
+        return str(exc)
+    if isinstance(exc, ToolInvocationError):
+        return exc.message
+    raise exc
+
+
 def run_agent(
     question: str,
     toolkit: Toolkit,
@@ -173,7 +172,7 @@ def run_agent(
       precise brake, and the one D3 reports against. Exceeding it refuses the
       call and tells the agent to answer with what it has.
     * **``recursion_limit``** on the graph, as a backstop for a model that
-      keeps looping without producing an answer — which the budget alone
+      keeps requesting refused calls — which the budget alone
       cannot stop, since a refused call still returns normally.
 
     Neither raises out of this function. A hit limit is a *result*
@@ -184,13 +183,13 @@ def run_agent(
     toolkit.max_calls = settings.max_steps
     agent = create_react_agent(
         model if model is not None else build_model(settings),
-        build_tools(toolkit),
+        ToolNode(build_tools(toolkit), handle_tool_errors=_tool_error_message),
         prompt=SYSTEM_PROMPT,
     )
 
     # Sized so the toolkit budget is the binding constraint: it must refuse a
     # call, and the agent must get a turn to answer afterwards, all before
-    # LangGraph's own limit trips. Each tool cycle is two node visits.
+    # LangGraph's own limit trips. Each sequential tool cycle is two graph steps.
     config: RunnableConfig = {"recursion_limit": 2 * (settings.max_steps + 2) + 2}
     started = time.perf_counter()
     messages: list[BaseMessage] = []

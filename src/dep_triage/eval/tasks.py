@@ -1,4 +1,4 @@
-"""Task schema and the eight question classes.
+"""Task schema and the nine question classes.
 
 A task stores **question parameters, not answers**. Ground truth is computed
 from the fixture by :mod:`dep_triage.eval.reference` every time the harness
@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field, model_validator
 
 Split = Literal["dev", "held_out"]
 
-#: The eight question classes from M0 scope §3.4.
+#: The question classes from M0 scope §3.4 and the later existence probe.
 TaskClass = Literal[
     "vulnerable_affected",
     "vulnerable_clean",
@@ -97,6 +97,12 @@ ALLOCATION: dict[TaskClass, tuple[int, int]] = {
 #: and is reported as traces. Padding it with near-duplicates to reach a
 #: respectable count would manufacture precision that the data does not have.
 EXISTENCE_PROBE_CLASSES: frozenset[TaskClass] = frozenset({"minimum_safe_version_deep"})
+
+#: These retain their original split in data/tasks.json, but must never be run
+#: again. Commit 0dd1cd2 and findings-framing.md published all three systems'
+#: answers before the final evaluation. Kuntal approved reporting the remaining
+#: 38 held-out tasks separately on 2026-10-15. Do not replace these with new tasks.
+EXPOSED_TASK_IDS = frozenset({"minsafe-deep-03", "minsafe-deep-04"})
 
 
 class TaskSpec(BaseModel):

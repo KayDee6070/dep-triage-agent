@@ -32,6 +32,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+from dep_triage.eval.assertions import distinct_versions, version_matches
 from dep_triage.eval.reference import GroundTruth
 from dep_triage.eval.tasks import TaskSpec, Verdict
 from dep_triage.fixture import normalise, versions_equal
@@ -47,8 +48,6 @@ VERDICT_TOKENS: dict[str, Verdict] = {
     "VERSION_UNKNOWN": "version_unknown",
     "PACKAGE_UNKNOWN": "package_unknown",
 }
-
-VERSION_TOKEN = re.compile(r"\b\d+(?:\.\d+){1,3}(?:[a-z]+\d+)?\b")
 
 #: Prose patterns per verdict, ordered so that negated and more specific forms
 #: are tried before the bare positive. "is not vulnerable" contains
@@ -179,14 +178,14 @@ def _grade_version(text: str, expected: str | None) -> Grade:
     line = answer_line(text)
     source: str = line if line is not None else text
     method: GradeMethod = "answer_line" if line is not None else "prose_fallback"
-    found = VERSION_TOKEN.findall(source)
+    found = [value for value, _, _ in version_matches(source, answer=line is not None)]
     if not found:
         grade.note = "no version string in the answer"
         return grade
 
     grade.method = method
     grade.extracted = ", ".join(found)
-    unique = {token for token in found}
+    unique = distinct_versions(found)
     grade.ambiguous = len(unique) > 1
     grade.correct = any(versions_equal(candidate, expected) for candidate in found)
     if grade.ambiguous:
@@ -217,11 +216,17 @@ def _grade_name_set(text: str, expected: list[str] | None, candidates: list[str]
     if line.strip().upper().rstrip(".") in NONE_TOKENS:
         named: set[str] = set()
     else:
-        named = {
-            normalise(part)
-            for part in re.split(r"[,\s]+", line)
-            if part.strip() and normalise(part) in known
-        }
+        # An extra, explicitly named package is an incorrect set, not a word
+        # to silently discard. The old candidate filter could score an answer
+        # containing only an invented package as the correct empty set.
+        source = re.sub(r"\s+and nothing else\s*$", "", line, flags=re.I).strip()
+        name_pattern = r"[A-Za-z0-9][A-Za-z0-9._-]*"
+        canonical = re.fullmatch(rf"{name_pattern}(?:\s*,\s*{name_pattern})*", source)
+        named = {normalise(part) for part in re.split(r"[,\s]+", source) if part.strip()}
+        if not canonical and not named <= known:
+            grade.method = "none"
+            grade.note = "unrecognised prose in name-set answer line"
+            return grade
 
     grade.extracted = ",".join(sorted(named)) or "NONE"
     grade.correct = named == {normalise(name) for name in expected}

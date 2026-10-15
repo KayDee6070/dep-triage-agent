@@ -20,5 +20,6 @@ htmlcov/
 
 # Generated artifacts
 results/
+data/.held-out-runs/
 reports/
 *.gguf

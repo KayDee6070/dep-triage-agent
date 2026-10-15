@@ -1,7 +1,12 @@
 # How results will be framed
 
-**Written 2026-10-10, before the fault suite ran and before the held-out set
-was touched.** Committed at this date deliberately: a framing written after
+**Written 2026-10-10, before the fault suite ran.** The original claim that no
+held-out task had been touched was false: redis and certifi below were already
+assigned to `held_out`. On 2026-10-15 Kuntal approved preserving all tasks,
+excluding those two from future execution, and reporting the remaining 38
+separately. See [the measurement amendment](milestones/M3-protocol.md).
+
+Committed at this date deliberately: a framing written after
 seeing the numbers is indistinguishable from a framing chosen to suit them.
 
 Everything below is a commitment about *how* a result gets reported, not a
@@ -12,7 +17,8 @@ both branches are written out in advance.
 
 ## 1. The clean-arm null result
 
-**Measured, dev subset, 20 tasks:**
+**Historical measurement of the prior dev subset, 20 tasks:** this predates the
+deep-probe allocation change. Do not present these as current-set results.
 
 | System | Correct | Mean calls |
 |---|---|---|
@@ -24,34 +30,38 @@ Paired: 0 wins / 18 ties / 1 loss against `no_agent` (**1 discordant pair**);
 0 / 19 / 0 against `always_lookup` (**0 discordant pairs**).
 
 **This is reported as a finding, not padded and not dropped.** Zero discordant
-pairs means the systems are indistinguishable on this task set — which is a
-result about the task set and about routing, not a gap in the measurement.
+pairs means no difference was observed among the gradable paired outcomes.
+It does not establish statistical equivalence or general equality of systems.
 
 ### The mechanism, stated so the result is interpretable
 
-`no_agent` calls every tool on every pin. It therefore has **strictly more
-information than the agent, on every task, always**. A task requiring three
-tools still hands `no_agent` all three outputs.
+`no_agent` calls each tool on each extracted pin, with fixed arguments. It
+often supplies more tool output than the agent chooses to request. It does
+**not** necessarily contain the same information: the agent can filter release
+windows or check a newly selected version, while the script checks the pin.
+The original unconditional strict-superset claim exceeded what the code does.
 
 So:
 
-> **Routing is dominated by exhaustive calling whenever calling everything is
-> affordable and fits in context.**
+> When fixed exhaustive calls supply all evidence needed for the answer and
+> fit the budget and context, routing has no information-access advantage.
 
-That is arithmetic, not a property of these 60 tasks. Adding harder or
-compose-required tasks would not change it — the baseline receives the same
-tool outputs the agent would have had to select. Designing tasks until the
-agent wins would be fitting the benchmark to a desired result, and is
-explicitly not done.
+Whether those conditions hold is task-dependent; the baseline's name does not
+prove them. Designing tasks until the agent wins would still fit the benchmark
+to a desired result and remains explicitly forbidden.
 
 ### Consequence for the report
 
-The headline is not "the agent scored X%". It is:
+A headline must use the observed paired counts and their uncertainty. If the
+final clean comparison supplies no evidence of an advantage, it can say:
 
-> On clean inputs with four cheap tools whose outputs fit the context window,
-> tool routing provided no measurable accuracy benefit over calling every tool
-> — 0 discordant pairs out of 40 held-out tasks against the one-tool baseline.
-> This is expected rather than surprising, and the reason is stated above.
+> On this clean task set, routing provided no demonstrated accuracy benefit
+> over the baselines. Report wins, ties, losses, excluded pairs, discordances,
+> and exact McNemar p from the actual run.
+
+The original placeholder asserted zero discordances on 40 held-out tasks
+before that measurement existed. It was not a result and must not be quoted
+as one.
 
 ---
 
@@ -63,7 +73,7 @@ such conditions, each structurally motivated rather than chosen to flatter:
 | Condition | Why the baseline cannot compete |
 |---|---|
 | **Context overflow** | `no_agent` concatenates everything. Unfiltered `list_releases` truncates at 60 of up to 2132 releases; if the answer is older it is simply absent from the baseline's input. A routed agent can issue `since_version`. |
-| **Faults** | `no_agent` is a fixed script with one shot. It cannot retry, switch tools, or abstain. |
+| **Faults** | `no_agent` cannot adapt its calls or retry. Its sole model answer can still abstain if the script reaches it. |
 | **Cost** | 2.4 calls against 5.5. On a metered API this is the entire argument for routing, and it is the one axis where the agent already wins. |
 
 Cost is reported as a first-class number, not a footnote.
@@ -105,7 +115,9 @@ precision the data does not have.
 | redis==4.2.0 | 4.4.4 | 5.0.0 ✗ | 4.3.6 ✗ | 4.3.6 ✗ |
 | certifi==1.0.0 | 14.05.14 | 2024.8.30 ✗ | 2024.7.4 ✗ | 2024.7.4 ✗ |
 
-10 of 12 runs wrong. The agent failed all four and **exhausted its 8-call
+These are historical observations, including the two exposed held-out tasks.
+Full raw traces were not retained in this checkout; this table is not a
+substitute for trace evidence. 10 of 12 runs were wrong. The agent failed all four and **exhausted its 8-call
 budget on every one**.
 
 The class was built to give routing a fair hearing. The honest reading is the
@@ -153,9 +165,11 @@ inconclusive result reported as a positive one.
 
 ## 6. What will not happen
 
-- No task will be added, removed or reworded after the held-out set is run.
+- No task will be added, replaced or reworded. The approved exposure exclusion
+  changes execution eligibility, not the committed task records.
 - No prompt will be changed to improve a number. Changes that remove ambiguity
   from a badly written question are allowed before the held-out run and are
   recorded individually.
 - A gap smaller than the interval is reported as inconclusive, never as a trend.
-- The held-out 40 is executed **once**.
+- The remaining held-out 38 is executed **once per declared system/arm**. The
+  two exposed probes are never executed again and are disclosed separately.

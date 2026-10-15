@@ -238,6 +238,21 @@ def test_name_set_ignores_words_that_are_not_candidates() -> None:
     assert result.correct is True
 
 
+def test_name_set_does_not_discard_an_explicit_extra_package() -> None:
+    result = grade(name_task(), name_truth(["gunicorn"]), "ANSWER: gunicorn, invented-pkg")
+    assert result.correct is False
+
+
+def test_invented_package_is_not_graded_as_an_empty_set() -> None:
+    result = grade(name_task(), name_truth([]), "ANSWER: invented-pkg")
+    assert result.correct is False
+
+
+def test_unreadable_name_set_is_ungradable_not_silently_filtered() -> None:
+    result = grade(name_task(), name_truth(["gunicorn"]), "ANSWER: perhaps gunicorn or something")
+    assert result.correct is None
+
+
 def test_name_set_is_not_graded_from_prose() -> None:
     """Every candidate appears in the question, so prose cannot be read safely."""
     result = grade(

@@ -7,12 +7,36 @@ three reported metrics while every tool test stayed green.
 
 from __future__ import annotations
 
+import time
+from concurrent.futures import ThreadPoolExecutor
+
 import pytest
 
 from dep_triage.fixture import Fixture
+from dep_triage.tools import triage
 from dep_triage.tools.wrapper import TOOL_NAMES, ToolError, ToolFault, Toolkit
 
 # --- instrumentation ------------------------------------------------------
+
+
+def test_parallel_calls_cannot_overspend_budget_or_duplicate_indices(
+    tiny_fixture: Fixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = triage.list_releases
+
+    def slow(
+        fixture: Fixture, package: str, since_version: str | None = None
+    ) -> triage.ReleaseList:
+        time.sleep(0.01)  # Force overlap while the tool executes, not while choosing a call.
+        return original(fixture, package, since_version)
+
+    monkeypatch.setattr(triage, "list_releases", slow)
+    kit = Toolkit(tiny_fixture, max_calls=2)
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        list(executor.map(kit.list_releases, ["demo-pkg"] * 12))
+    assert len([c for c in kit.calls if c.ok]) == 2
+    assert [c.index for c in kit.calls] == list(range(1, 13))
 
 
 def test_calls_are_recorded_in_order(tiny_fixture: Fixture) -> None:

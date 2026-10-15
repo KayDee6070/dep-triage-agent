@@ -1,0 +1,14 @@
+{
+  "observed_on": "2026-10-15",
+  "ollama_version": "0.40.1",
+  "model": "qwen3:8b",
+  "model_digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+  "quantization": "Q4_K_M",
+  "runtime_context_tokens": 4096,
+  "runtime_size_vram_bytes": 5578204118,
+  "historical_handoff_context_tokens": 8192,
+  "configuration_changed_during_measurement": false,
+  "runtime_sources": ["GET http://localhost:11434/api/version", "GET http://localhost:11434/api/tags", "GET http://localhost:11434/api/ps"],
+  "first_clean_run_max_reported_input_tokens": {"agent": 2776, "no_agent": 3995, "always_lookup": 1264},
+  "input_token_source": "results/m3-gates/run-1.json assistant usage_metadata.input_tokens"
+}

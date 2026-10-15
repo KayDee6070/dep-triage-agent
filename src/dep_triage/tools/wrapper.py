@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
+from threading import RLock
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -144,6 +145,7 @@ class Toolkit:
         self._faults = faults
         self._calls: list[ToolCallRecord] = []
         self._counts: dict[str, int] = {}
+        self._lock = RLock()
 
         #: Hard ceiling on tool calls per task. Exceeding it refuses the call
         #: rather than raising: LangGraph's ToolNode catches tool exceptions and
@@ -172,6 +174,15 @@ class Toolkit:
         return None
 
     def _invoke(
+        self, tool: str, fn: Callable[[], BaseModel], arguments: dict[str, Any]
+    ) -> dict[str, Any]:
+        # ToolNode may dispatch several calls concurrently. Reserve/check the
+        # budget and assign indices under one lock; otherwise several calls
+        # can all observe the same remaining slot and overspend it.
+        with self._lock:
+            return self._invoke_locked(tool, fn, arguments)
+
+    def _invoke_locked(
         self, tool: str, fn: Callable[[], BaseModel], arguments: dict[str, Any]
     ) -> dict[str, Any]:
         if self.max_calls is not None and len(self._calls) >= self.max_calls:
@@ -209,7 +220,20 @@ class Toolkit:
             )
             raise ToolError(message)
 
-        payload = fn().model_dump()
+        try:
+            payload = fn().model_dump()
+        except Exception as exc:
+            self._calls.append(
+                ToolCallRecord(
+                    index=index,
+                    tool=tool,
+                    arguments=arguments,
+                    ok=False,
+                    error=f"tool implementation error:{type(exc).__name__}",
+                    duration_ms=(time.perf_counter() - started) * 1000,
+                )
+            )
+            raise
         if fault == "empty":
             payload = _empty(tool, payload)
         elif fault == "malformed":

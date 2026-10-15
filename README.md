@@ -9,21 +9,22 @@ harness that measures whether it actually works.**
 
 | | |
 |---|---|
-| **State** | **M2 agent working** — runs end to end against local Qwen3-8B. **No eval harness yet. No measured results.** |
-| Day | 2 of 14 (started 2026-10-08, deadline 2026-10-21) |
-| Tests | 135, 2.5 s · ruff clean · mypy `strict` |
+| **State** | **M3 complete** — 300 clean dev executions plus 90 fault executions; final held-out measurement deferred |
+| Schedule | No deadline; the six definition-of-done criteria are the stopping line |
+| Tests | Offline pytest suite, ruff, and strict mypy; measured counts in the M3 report |
 | Clone to green | **18 s** cold cache (budget 60 s) |
 | Fixture | 80 packages, 1487 advisories, snapshot 2026-10-09 |
-| Results | **None.** Measured once on 2026-10-20 — see [Results](#results) |
+| Results | Development results in [M3 report](docs/milestones/M3-report.md); no final result yet |
 
-Nothing here claims a measurement that has been taken. The Results table is
-present but empty: the exact claims this project will make, fixed in writing
-before the numbers exist, so they cannot be quietly reshaped to fit whatever
-comes out.
+The JSON harness, both baselines, fault suite, and held-out guard work. The
+static HTML report, Docker image, and deployed service are later milestones.
 
-Two commitments below — the held-out split and the baselines — are **specified
-but not yet implemented**. They land in M3. Said plainly rather than letting
-"designed" imply "working".
+**Exposure disclosure:** the original allocation remains 20 dev / 40 held-out,
+but two held-out deep probes already had published results. With the owner's
+approval, they are excluded from future execution and reported as historical
+examples. The final comparison will cover the remaining **38**, once per
+declared system/arm. No replacement tasks were created. See the
+[measurement protocol](docs/milestones/M3-protocol.md).
 
 Full rationale including every rejected alternative:
 [`docs/milestones/M0-scope.md`](docs/milestones/M0-scope.md). Environment
@@ -70,9 +71,9 @@ a security product.
 | `list_releases(pkg, since_version=None)` | published versions at or above a floor |
 | `check_compatibility(pkg, version, python_version)` | `requires_python`, a compatibility verdict, declared deps |
 
-Deliberately non-substitutable — each question class needs a different subset,
-which is what makes tool-selection accuracy a real measurement rather than a
-formality.
+The reference resolver uses different tool subsets across classes. This is
+not proof that those subsets are minimal: seven of nine classes are often
+answerable with lookup alone. Tool recall measures reference-path agreement.
 
 `since_version` exists so the agent can avoid truncation by asking a targeted
 question, instead of tasks being curated around an output cap. boto3 carries
@@ -127,19 +128,20 @@ semantic; as strings alone they were a trap.
 
 | Class | Total | Dev | Held-out | Tools | Correct answer |
 |---|---|---|---|---|---|
-| Is `pkg==X` vulnerable? — affected | 10 | 3 | 7 | 2 | yes + CVE set |
+| Is `pkg==X` vulnerable? — affected | 8 | 2 | 6 | 2 | vulnerable |
 | Is `pkg==X` vulnerable? — known, clean | 6 | 2 | 4 | 2 | not vulnerable |
 | Unpublished version — *abstention* | 6 | 2 | 4 | 2 | never shipped |
 | Unknown package — *abstention* | 6 | 2 | 4 | 2 | unknown |
-| Minimum safe version? | 10 | 3 | 7 | 2, 3 | version string |
+| Minimum safe version? | 8 | 2 | 6 | 2, 3 | version string |
+| Deep minimum-safe existence probe | 4 | 2 | 2 exposed | 2, 3 | version; traces only |
 | Which packages in this file are vulnerable? | 8 | 3 | 5 | 1, 2 | set of names |
 | Can I upgrade on Python `N`? | 8 | 2 | 6 | 2, 3, 4 | bool + reason |
 | Direct CVE lookup — *over-call probe* | 6 | 3 | 3 | 2 | affected ranges |
 
-"Minimum safe version" needs tools 2 **and** 3, because an advisory's `fixed`
-boundary is not always a version that shipped — answering from the advisory
-alone names versions nobody can install. The over-call probe needs exactly one
-tool and no parsing, so an agent that parses anyway is over-calling.
+The reference checks both advisories and published releases for minimum-safe
+questions. Advisory boundaries nevertheless suffice in many cases, which the
+lookup-only baseline measures. The over-call probe needs one lookup; parsing
+the distractor requirements adds calls without answering the requested pin.
 
 ---
 
@@ -150,9 +152,9 @@ the result unreportable.
 
 ### 1. Held-out split, declared before any measurement
 
-**20 dev / 40 held-out.** Iteration happens freely on the dev 20. The held-out
-40 runs **once**, on 2026-10-20, and that is the published result. Both halves
-cover all eight classes.
+**20 dev / 40 originally held-out records; 38 eligible for final evaluation.**
+Iteration happens on development tasks. Neither exposed probe is rerun. The
+final 38 run once per declared system/arm, after deployment is proven.
 
 Without this, "measure → diagnose → fix → re-measure" produces a number fitted
 to the data it is reported on.
@@ -160,7 +162,7 @@ to the data it is reported on.
 ### 2. Baselines, so the score means something
 
 "The agent scored 70%" is uninterpretable alone. Two baselines, on the **same
-40 held-out tasks**:
+38 eligible held-out tasks**:
 
 | Baseline | What it does |
 |---|---|
@@ -175,8 +177,8 @@ day-5 reproducibility gate covers all three.
 
 Every answer is a version string, boolean, or set — compared by equality
 against a reference answer computed from the same fixture. The reference script
-also derives the **minimal necessary tool set** mechanically, so tool
-expectations involve no hand-labelling and no opinion.
+also records the **reference tool path** mechanically. It is not a proof of
+minimal tool use, and a correct shorter route is possible.
 
 A judge would add cost and variance for no gain. The domain was *designed* to
 have exact ground truth, which makes deterministic evaluators correct here
@@ -186,18 +188,19 @@ rather than merely cheaper.
 
 ## What gets measured
 
-**Primary: `task_accuracy`** — fraction of tasks whose final answer exactly
-matches ground truth. The three families below *explain* it; they are not peers
+**Primary: `task_accuracy`** — correct / gradable tasks, with correct,
+incorrect, ungradable, and total counts shown together. Correct / total is
+also reported as an observed success lower bound. The three families below *explain* it; they are not peers
 of it. 90% tool selection with 40% task accuracy is a finding; without the
 denominator it is noise.
 
 ### Agent vs baseline is paired
 
-Same 40 tasks, two systems, so the information is in the **discordant pairs**.
+Same eligible tasks, two systems, so the information is in the **discordant pairs**.
 Reported as `wins / ties / losses` plus `discordant_pairs` plus an exact
 McNemar test (binomial, not chi-square — the discordant count will be small).
 
-Pairing raises power substantially; it does not rescue n=40. With 9 discordant
+Pairing raises power substantially; it does not rescue this sample size. With 9 discordant
 pairs an 8–1 split is significant; with 4 pairs a 4–0 split is not. The pair
 count is reported alongside every comparison so a reader can see which case
 they are in.
@@ -206,7 +209,7 @@ they are in.
 
 | Metric | Status |
 |---|---|
-| `tool_recall` | **Hard.** Below 1.0 means the agent answered without information it needed. |
+| `tool_recall` | Agreement with the reference path; below 1.0 does not prove guessing. |
 | `tool_precision` | **Soft.** Extra calls are waste, not error. |
 | `first_call_accuracy` | reported |
 | `no_tool_discipline` | on tasks needing no tool, did it call zero |
@@ -234,7 +237,7 @@ Two denominators, both reported, never collapsed:
 
 | Rate | Denominator | Reading |
 |---|---|---|
-| `fabrication_per_assertion` | every version/ID asserted | **Headline.** Large n, tight interval. |
+| `fabrication_per_assertion` | distinct extracted version/ID assertions | **Headline lower bound.** Assertions within a task are dependent. |
 | `fabrication_per_task` | fault-injected tasks with ≥1 fabrication | Wide interval, but the number readers want. |
 
 Both are **lower bounds**: an agent that implies a version without naming it is
@@ -265,11 +268,12 @@ bear.
 
 ## Results
 
-**Not yet measured.** Single run on 2026-10-20: ~180 executions, ~60 minutes.
+**Final evaluation not yet measured.** Development results, gate outcomes,
+faults, and limitations are in [M3-report.md](docs/milestones/M3-report.md).
 
 | | Agent | `no-agent` | `always-lookup` |
 |---|---|---|---|
-| `task_accuracy` (held-out 40) | — | — | — |
+| `task_accuracy` (eligible held-out 38) | — | — | — |
 | vs agent: wins / ties / losses | — | — | — |
 | `discordant_pairs`, McNemar p | — | — | — |
 | `tool_recall` / `tool_precision` | — | n/a | n/a |
@@ -289,12 +293,12 @@ unmeasured claim.
 
 Stated now rather than discovered in the write-up.
 
-**Sample size.** 40 held-out tasks. Unpaired, a headline accuracy figure
+**Sample size.** 38 eligible held-out tasks. Unpaired, a headline accuracy figure
 carries roughly **±15pp** at 95% confidence; the fault suite is ~**±22pp** at
 20 tasks per mode. More tasks is not the fix: 80 reaches only ~±11pp and ~96
 are needed for ±10pp, which the time budget cannot buy without gutting the
 harness that is the deliverable. Pairing and tiering make this workable;
-neither makes n=40 behave like n=400.
+neither makes this sample behave like n=400.
 
 **The snapshot goes stale.** A benchmark fixture, not a security product. Do
 not use it to audit real dependencies.
@@ -357,8 +361,8 @@ three systems.
 
 ## Target interface
 
-*`version`, `config` and `ask` work. `eval` and `report` arrive at M3; stubs
-that raise would make `--help` advertise an interface that does nothing.*
+*`version`, `config`, `ask`, and JSON `eval` work. HTML `report` and the service
+are not implemented yet.*
 
 ```bash
 uv sync --frozen                         # clone to green, 18s cold
@@ -371,13 +375,15 @@ ollama pull qwen3:8b                     # one-time, 5.2 GB
 
 uv run dep-triage ask "is urllib3==1.26.4 vulnerable?"          # works
 uv run dep-triage ask --trace "is django==4.2 vulnerable?"     # works
-uv run dep-triage eval --split dev              # 20 tasks, ~9 min
-uv run dep-triage eval --split held-out         # 40 tasks — run ONCE
-uv run dep-triage eval --baseline no-agent --split dev
-uv run dep-triage report                        # static HTML report
-
-docker run -p 8000:8000 dep-triage-agent
+uv run dep-triage eval --split dev --system all
+uv run dep-triage eval --split dev --system all --faults
+uv run python scripts/check_eval_gates.py --output-dir results/new-gate-run
 ```
+
+Each run writes full JSON, canonical metrics JSON, and per-task JSONL
+checkpoints. Existing output paths are never overwritten. The held-out split
+requires `--confirm-held-out-once` and a one-use ledger; do not invoke it during
+development. The two exposed probes are excluded even with confirmation.
 
 ---
 
@@ -385,11 +391,11 @@ docker run -p 8000:8000 dep-triage-agent
 
 A 5th tool · multi-agent or orchestration · vector DB / RAG · any web UI beyond
 the static report and one form · Grafana · Kubernetes · Terraform ·
-fine-tuning · **any prompt tuning against the held-out 40**.
+fine-tuning · **any prompt or tool change aimed at improving an eval score**.
 
-Cut order if the 14 days overrun: Prometheus endpoint, then
-`check_compatibility`, then 60 tasks → 40. **Never the held-out split or the
-baselines.** The buffer is this list, not a spare day.
+The deadline is withdrawn. The original cut order remains available for a
+genuine blocker: Prometheus, the compatibility tool, then task count. Never
+remove the held-out comparison or the baselines to disguise a weak result.
 
 ---
 
@@ -399,11 +405,12 @@ Not "polished". Done when all six hold:
 
 1. The public link works.
 2. The agent runs in Docker from a clean checkout.
-3. The harness produces a measured result on the held-out 40 — good or bad —
-   alongside both baselines.
+3. The harness measures the remaining held-out 38 — good or bad — alongside
+   both baselines, with the two exposed probes disclosed separately.
 4. A study script explains it, with every claim backed by an assertion.
 5. Every milestone ended green: tests pass, linter clean, committed.
-6. The held-out set was measured **once**.
+6. Each eligible final task runs **once per declared system/arm**; neither
+   exposed probe is rerun. The earlier exposure is disclosed.
 
 ---
 
@@ -414,6 +421,9 @@ Not "polished". Done when all six hold:
 - [`docs/setup.md`](docs/setup.md) — environment, measured hardware numbers
 - [`docs/milestones/M1-report.md`](docs/milestones/M1-report.md) — built,
   decided, measured, still weak
+- [`docs/milestones/M2-report.md`](docs/milestones/M2-report.md) — agent and graph walkthrough
+- [`docs/milestones/M3-report.md`](docs/milestones/M3-report.md) — harness and development measurements
+- [`docs/milestones/M3-protocol.md`](docs/milestones/M3-protocol.md) — denominators and exposure correction
 - [`CONTRIBUTIONS.md`](CONTRIBUTIONS.md) — my decisions vs. AI-assisted work
   vs. external review, per milestone
 

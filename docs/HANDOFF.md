@@ -1,20 +1,31 @@
 # Handoff — read this first
 
-**Written 2026-10-15 for a fresh assistant session with no prior context.**
+**Updated 2026-10-15 after M3 completion for a fresh assistant session.**
 
 Repo: `/home/kuntal/Projects/active/dep-triage-agent`, branch `main`,
-16 commits, working tree clean, all checks green.
+Check `git status` for current commit/worktree state; do not infer it from this file.
+
+**Read this correction first:** two originally held-out deep probes were already
+measured in `0dd1cd2`. Kuntal approved preserving all 60 records, excluding
+`minsafe-deep-03` and `minsafe-deep-04` from future execution, and measuring the
+remaining **38** once at the final stage. The old untouched-40 claim was false.
+Historical 18/20 dev results also predate the current allocation. Current
+measurements and source artifacts are in `docs/milestones/M3-report.md`.
+
+**Current next job: M4 diagnosis, dev only.** M3 is complete. Five clean repeats
+gave agent 16/20, no_agent 18–19/20, always_lookup 18/20. The baseline failed
+the byte-identical gate; three additional repeats and all-metric variance were
+recorded. The model-switch threshold did not trigger. The runtime actually used
+**4096 context tokens**, not the historical 8192. No model setting was changed
+to improve a result. The 90-run fault suite and corrected offline scoring are
+complete; both owed milestone reports now exist.
 
 Read in this order: this file → `docs/milestones/M0-scope.md` (the contract) →
 `docs/findings-framing.md` (how results must be reported) → `README.md`.
 
-Every number in this file was verified against the repository on 2026-10-15,
-not written from memory: commit count, line counts, fixture and task counts,
-the allocation table against `ALLOCATION` in code, the caps, the config
-defaults, and the `RECURSION_SENTINEL` string. That check caught one stale
-claim — the fixture snapshot date, which moved to 2026-10-09 when the GIT-range
-bug was fixed and was still recorded as 10-08 here and in the README. If you
-change any of these, re-run the same check rather than trusting the prose.
+The first version claimed every number was verified, but its exposure and
+runtime claims did not survive a cold-start audit. Verify against the committed
+artifacts and code, not this prose. The fixture snapshot remains 2026-10-09.
 
 ---
 
@@ -53,7 +64,7 @@ that is the result and it gets published.
 | **One agent** | No multi-agent, no supervisor, no orchestration patterns. |
 | **4 tools maximum** | A 5th tool is an automatic no. |
 | **No Kubernetes** | Docker and a deployed service. No Terraform. |
-| **Held-out set runs ONCE** | The 40 held-out tasks are sealed. Never run them to "check". |
+| **Held-out set runs ONCE** | The remaining 38 are reserved for the final run; never rerun the two exposed probes. |
 | **No tuning against the eval** | Never change a prompt or tool to improve a number. |
 | **A bad result gets published** | No quietly dropping metrics that look bad. |
 | **No secrets in the repo** | Env vars + `.env.example`; a test enforces parity. |
@@ -123,7 +134,7 @@ explicitly, and he asked for it to apply to himself.
 
 ### For reference, not as pressure
 Started 2026-10-08. Five days passed with no commits (2026-10-10 to 10-15).
-M3 is roughly 70% done; M4 through M7 are untouched. Remaining order of work is
+M3 is complete; M4 through M7 remain. Remaining order of work is
 in §11 — follow the order, ignore the dates.
 
 ## 4. Current state — what exists
@@ -134,19 +145,18 @@ in §11 — follow the order, ignore the dates.
 | M0 scope | ✅ Agreed; **4 rounds of senior review applied** (see §7) |
 | M1 repo hygiene | ✅ green — CI, strict mypy, 18 s clone-to-green cold |
 | M2 agent | ✅ `dep-triage ask` works end to end on local Qwen3-8B |
-| M3 eval harness | 🟡 ~70% — tasks, ground truth, grader, baselines done |
+| M3 eval harness | ✅ complete — metrics, faults, CLI, gates, reports and saved evidence |
 | M4 measure / M5 Docker / M6 deploy / M7 docs | ❌ not started |
 
 ### Numbers
-3079 lines source + scripts · 1965 lines tests · **203 tests, all passing** ·
-ruff clean · mypy `strict` clean on 28 files.
+**259 tests** · ruff clean · mypy `strict` clean on **41 files**.
 
 ### Files that matter
 
 ```
 src/dep_triage/
   config.py            Settings (pydantic-settings), env prefix DEP_TRIAGE_
-  cli.py               typer app: version, config, ask   (eval/report TODO)
+  cli.py               typer app: version, config, ask, eval (HTML report still TODO)
   fixture.py           snapshot schema + loader + SEMANTIC version comparison
   fixture_spec.py      the curated 80-package list + 8 fake package names
   tools/triage.py      the four tools as pure functions over the fixture
@@ -156,17 +166,26 @@ src/dep_triage/
   eval/reference.py    Evidence + resolvers -> computed ground truth
   eval/grading.py      free text -> correct / incorrect / UNGRADABLE
   eval/baselines.py    no_agent, always_lookup
+  eval/suite.py        deterministic clean/fault plans; excludes exposed IDs
+  eval/runner.py       shared execution and persistent held-out reservations
+  eval/metrics.py      accuracy, paired exact tests, D1/D2/D3, variance
+  eval/assertions.py   conservative fabrication detector
+  eval/artifacts.py    JSON results, canonical metrics, JSONL checkpoints
   service/             empty — M6
 scripts/
   build_fixture.py     one-time: PyPI + OSV -> data/fixture/   (needs network)
   build_tasks.py       deterministic task selection -> data/tasks.json
+  check_eval_gates.py   dev twice; if unstable, three extra repeats and variance
+  rescore_eval.py       offline correction from saved traces; zero model calls
 data/
   fixture/             80 packages, 1487 advisories, snapshot 2026-10-09, 5.5 MB
   tasks.json           60 tasks, 24 KB
 docs/
   milestones/M0-scope.md    THE CONTRACT — 16 sections, revision history at §16
   milestones/M1-report.md
-  (milestones/M2-report.md and M3-report.md do NOT exist yet — owed)
+  milestones/M2-report.md   agent and verified graph walkthrough
+  milestones/M3-report.md   current dev measurements and limitations
+  milestones/M3-protocol.md denominators, fault selection, exposure amendment
   findings-framing.md       how results MUST be reported (written before numbers)
   setup.md                  environment + measured hardware numbers
   HANDOFF.md                this file
@@ -321,7 +340,11 @@ pins from the question text.
 
 ---
 
-## 6. Results so far — dev subset only, held-out untouched
+## 6. Historical results — superseded by the M3 report
+
+The clean table below belongs to the previous development allocation. The
+deep-probe table includes the two exposed held-out tasks. Neither table proves
+that the current 40 originally assigned held-out records are pristine.
 
 | System | Correct | Incorrect | Ungradable | Mean calls |
 |---|---|---|---|---|
@@ -333,16 +356,16 @@ pins from the question text.
 0 / 19 / 0 vs `always_lookup` → **0 discordant pairs**.
 
 ### The central finding, and its mechanism
-`no_agent` calls every tool, so it has **strictly more information than the
-agent, on every task, always**. Therefore:
+The original strict-superset argument was too strong: `no_agent` uses fixed
+arguments, while the agent can query different versions and filtered windows.
+The narrower conditional argument is:
 
-> **Routing is dominated by exhaustive calling whenever calling everything is
-> affordable and fits in context.**
+> When exhaustive fixed calls supply all required evidence and fit the budget
+> and context, routing has no information-access advantage.
 
-That is arithmetic, not a property of these 60 tasks. **Adding harder tasks
-would not change it** — the baseline receives the same outputs the agent had to
-choose between. Designing tasks until the agent wins would be fitting the
-benchmark to a desired result and is explicitly forbidden.
+Whether those conditions hold depends on the task and arguments. Designing
+tasks until the agent wins would still fit the benchmark to a desired result
+and remains explicitly forbidden. See the amended findings framing.
 
 Routing is only undominated under three conditions: **context overflow**,
 **faults**, and **cost** (2.4 calls vs 5.5 — the one axis the agent already
@@ -474,6 +497,11 @@ defects are now tests.
 | Docker | **29.1.3 installed 2026-10-15**, daemon active + enabled; Compose 2.40.3 |
 
 ### Measured model behaviour
+
+These are historical setup measurements. During M3, `/api/ps` reported a
+4096-token runtime context and 5578204118 bytes VRAM. Keep that distinction:
+`results/m3-runtime.json` is the current measured configuration. Do not silently
+change it or report M3 numbers as an 8192-token run.
 | | |
 |---|---|
 | Throughput warm | **44.9 tok/s**, 37/37 layers on GPU |
@@ -529,12 +557,14 @@ cd /home/kuntal/Projects/active/dep-triage-agent
 
 uv sync --frozen                 # 18 s cold clone-to-green
 uv run ruff check . && uv run ruff format --check .
-uv run mypy                      # strict, 28 files
-uv run pytest                    # 203 tests, ~3 s
+uv run mypy                      # strict, 41 files
+uv run pytest                    # 259 tests
 
 uv run dep-triage version
 uv run dep-triage config         # resolved config, secret redacted
 uv run dep-triage ask --trace "Is pyyaml==5.4.1 vulnerable?"
+uv run dep-triage eval --split dev --system all
+uv run dep-triage eval --split dev --system all --faults
 
 uv run python scripts/build_fixture.py --output data/fixture   # network, ~30 s
 uv run python scripts/build_tasks.py  --output data/tasks.json # deterministic
@@ -550,7 +580,13 @@ code, re-run as `rtk proxy <cmd>`.
 
 ## 11. What is left — in order, with definitions of done
 
-### A. Finish M3 (next job)
+### A. M3 completed — checklist retained for traceability
+
+All items below are implemented and measured. Full results are in M3-report;
+`results/m3-gates/` preserves five clean runs and variance, and
+`results/m3-faults-rescored.json` is the corrected 90-execution fault artifact.
+The original fault artifact is retained. No additional model execution was
+used to correct the retry classifier.
 1. **Fault suite wiring.** Run the dev subset with `ToolFault` injected per
    mode (`error`/`empty`/`malformed`). 10 dev tasks × 3 modes = 30 runs.
    `no_agent` is a one-shot script and **cannot recover** — that is the point.
@@ -580,19 +616,20 @@ code, re-run as `rtk proxy <cmd>`.
 4. **Day-5 gates from M0** (now overdue, do them with the eval runner):
    - **Reproducibility**: dev subset twice, metrics **byte-identical**, for the
      agent **and both baselines**. Failure → 3 repeats + variance reporting.
-   - **Model switch**: <30% dev `task_accuracy` → Qwen2.5-7B-Instruct. At 90%
-     this will not trigger; record that it was checked.
+   - **Model switch**: <30% dev `task_accuracy` → Qwen2.5-7B-Instruct. Measured
+     80% on all five current-dev runs; no switch.
    - **`create_react_agent` walkthrough** — already documented in
      `agent/loop.py`'s module docstring; lift it into the M2/M3 report.
-5. `docs/milestones/M3-report.md` — **does not exist yet**; owed. Format:
-   built / decided / measured / still weak. An M2 report is owed too — the
-   `create_react_agent` walkthrough belongs in it.
+5. `docs/milestones/M3-report.md` and `M2-report.md` both exist. The latter
+   contains the walkthrough verified against the installed framework source.
 
-### B. M4 — measure and diagnose, **dev only**
-Three known dev failures to diagnose (all genuine agent errors, verified
-against the tools and resolver): `minsafe` ignoring `since_version` and walking
-downward; gradio finding *a* safe version not *the lowest*; pymongo answering
-yes to an upgrade needing Python ≥3.9 on 3.8.
+### B. M4 — next job: diagnose, **dev only**
+Use saved M3 traces first. Current clean failures are `minsafe-02`, both dev
+deep probes, and `pyupgrade-02`. The older gradio example is not the current
+dev minimum-safe task. Fault traces additionally show failed lookups treated
+as clean or unknown, and two wrong-package version claims from always_lookup.
+Diagnose the 4k runtime discrepancy and preserve the measured baseline variance;
+do not silently rewrite M3 as deterministic or as an 8k measurement.
 
 Legitimate fixes: tool descriptions, genuine bugs. **Not** legitimate: prompt
 changes aimed at raising a score.
@@ -616,11 +653,12 @@ changes aimed at raising a score.
 ### Definition of done for the whole project
 1. The public link works.
 2. The agent runs in Docker from a clean checkout.
-3. The harness produces a measured result on the **held-out 40** — good or bad
-   — alongside **both** baselines.
+3. The harness measures the **remaining held-out 38** — good or bad — alongside
+   **both** baselines, with the two exposed probes disclosed separately.
 4. A study script explains it, every claim backed by an assertion.
 5. Every milestone ended green.
-6. The held-out set was measured **once**.
+6. Each eligible final task is measured **once per declared system/arm**;
+   neither exposed probe is rerun. The earlier exposure is disclosed.
 
 ---
 
