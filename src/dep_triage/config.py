@@ -101,6 +101,20 @@ class Settings(BaseSettings):
     demo_daily_limit: int = 100
     demo_per_minute_limit: int = 5
 
+    @field_validator("llm_reasoning_effort", mode="before")
+    @classmethod
+    def _blank_effort_means_unset(cls, value: object) -> object:
+        """Treat an empty environment variable as "do not send this field".
+
+        ``DEP_TRIAGE_LLM_REASONING_EFFORT=`` reads as the empty string, which
+        was then sent verbatim and rejected by the gateway with a 400 listing
+        the allowed values. Unsetting a field by blanking its variable is the
+        obvious thing for a reader to try, so it now does what it looks like.
+        """
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
     @field_validator("llm_temperature")
     @classmethod
     def _check_temperature(cls, value: float) -> float:
