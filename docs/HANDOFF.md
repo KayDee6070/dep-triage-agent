@@ -471,7 +471,7 @@ defects are now tests.
 | `uv` | 0.12.23 at `~/.local/bin/uv` — **must be on PATH** |
 | Ollama | 0.40.1, installed **user-local, no sudo**, `systemctl --user` unit |
 | Model | `qwen3:8b` (5.2 GB) |
-| **Docker** | **NOT INSTALLED — blocks M5** |
+| Docker | **29.1.3 installed 2026-10-15**, daemon active + enabled; Compose 2.40.3 |
 
 ### Measured model behaviour
 | | |
@@ -487,12 +487,33 @@ Answering "17×23" cost **847 completion tokens**. `think: false` and
 works — it cuts that to 4. Set via `DEP_TRIAGE_LLM_REASONING_EFFORT`, default
 `none`. Without it a two-tool question **times out at 120 s**.
 
-### Hand to Kuntal — needs sudo (blocks M5 only)
+### Docker — installed, with one gotcha
+Installed 2026-10-15 via `apt` (`docker.io` 29.1.3 + `docker-compose-v2`
+2.40.3). Daemon is `active` and `enabled`. `kuntal` is in the `docker` group
+(`docker:x:129:kuntal`) and `hello-world` runs.
+
+**The gotcha:** a login session started *before* the group was created does not
+have it, and `docker` fails with
+`permission denied while trying to connect to the docker API at
+unix:///var/run/docker.sock`. Nothing is wrong — the group is simply not in
+that session's credential set.
+
+Two ways through it without logging out:
+
 ```bash
-sudo apt-get update && sudo apt-get install -y docker.io docker-compose-v2
-sudo usermod -aG docker $USER     # then log out and back in
-docker run --rm hello-world
+sg docker -c "docker run --rm hello-world"   # one command with the group applied
+newgrp docker                                # subshell with the group
 ```
+
+`id -nG | tr ' ' '\n' | grep -qx docker` tells you whether the current session
+has it. If it does not, prefix Docker work with `sg docker -c "..."` rather
+than reaching for `sudo` — `sudo docker` works but writes root-owned files into
+the build context.
+
+Nothing is blocked by this. M5 can proceed.
+
+Nothing further is outstanding from Kuntal. Everything needed to reach the
+definition of done is installed.
 
 ### Shell trap that killed two sessions
 `pgrep -f` / `pkill -f` match the assistant's **own shell command line** and
