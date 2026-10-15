@@ -305,17 +305,28 @@ def render(clean: dict[str, Any], faults: dict[str, Any] | None = None) -> str:
     )
 
     sections.append(
-        '<div class="note"><strong>This is a development measurement, not the '
-        "final result.</strong>"
-        f"Split: <code>{_esc(split)}</code>. The held-out task set has <em>not</em> been "
-        "run; it is reserved for a single final measurement. Numbers here were used "
-        "to diagnose behaviour and may freely have been iterated against, so they "
-        "carry no claim of being unbiased."
+        '<div class="note">'
+        + (
+            "<strong>Final measurement. Run once, on a sealed task set.</strong>"
+            f"Split: <code>{_esc(split)}</code>. These tasks were held back from the "
+            "whole of development and executed exactly once, after the last change "
+            "to anything the agent does. Nothing below was iterated against, and no "
+            "re-run is possible: the reservation that permitted this execution is "
+            "spent."
+            if split == "held_out"
+            else "<strong>This is a development measurement, not the final "
+            "result.</strong>"
+            f"Split: <code>{_esc(split)}</code>. The held-out task set is reserved "
+            "for a single final measurement. Numbers here were used to diagnose "
+            "behaviour and may freely have been iterated against, so they carry no "
+            "claim of being unbiased."
+        )
         + (
             "<br>Two held-out probes (<code>"
             + "</code>, <code>".join(map(_esc, excluded))
-            + "</code>) were exposed during development and are permanently excluded "
-            "from the final measurement."
+            + "</code>) were run during development before the split was being "
+            "honoured, and are permanently excluded. The sealed set is therefore "
+            "38 tasks, not 40, and that reduction is disclosed rather than absorbed."
             if excluded
             else ""
         )

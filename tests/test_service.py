@@ -28,8 +28,11 @@ from dep_triage.service.report import MIN_DISCORDANT_FOR_SIGNIFICANCE, render
 from dep_triage.tools.wrapper import ToolCallRecord
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CLEAN_RUN = REPO_ROOT / "results" / "m3-gates" / "run-1.json"
-FAULT_RUN = REPO_ROOT / "results" / "m3-faults.json"
+# The canonical artifacts are the final held-out run. The development run is
+# kept for the tests that specifically exercise dev-split wording.
+CLEAN_RUN = REPO_ROOT / "results" / "held-out-final.json"
+FAULT_RUN = REPO_ROOT / "results" / "held-out-final-faults.json"
+DEV_RUN = REPO_ROOT / "results" / "m3-gates" / "run-1.json"
 
 
 def repo_settings(**overrides: Any) -> Settings:
@@ -147,10 +150,21 @@ def test_report_is_self_contained(clean_run: dict[str, Any]) -> None:
     assert html.startswith("<!doctype html>")
 
 
-def test_report_states_it_is_not_the_final_result(clean_run: dict[str, Any]) -> None:
+def test_report_labels_the_held_out_run_as_final(clean_run: dict[str, Any]) -> None:
     html = render(clean_run)
+    assert clean_run["split"] == "held_out", "the committed report is the final run"
+    assert "Final measurement" in html
+    assert "exactly once" in html
+    assert "development measurement" not in html
+
+
+def test_report_labels_a_development_run_as_not_final() -> None:
+    """The banner must switch on the split, not be hardcoded either way."""
+    if not DEV_RUN.is_file():
+        pytest.skip("no development run committed")
+    html = render(json.loads(DEV_RUN.read_text(encoding="utf-8")))
     assert "development measurement" in html
-    assert "has <em>not</em> been" in html or "not</em> been run" in html
+    assert "Final measurement" not in html
 
 
 def test_report_discloses_the_exposed_held_out_probes(clean_run: dict[str, Any]) -> None:
