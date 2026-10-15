@@ -25,6 +25,17 @@ results/*
 # reviewable and its history visible. Rendering is deterministic and CI
 # re-renders to prove this copy is not stale.
 !results/report.html
-data/.held-out-runs/
+# ...and the evaluation artifacts themselves. These are the project's evidence:
+# the final held-out run, its fault arm, and the hosted runs including the one
+# that failed. A result nobody can inspect is a claim, not a measurement. The
+# per-task .jsonl checkpoints stay out — they are a crash-resume aid and every
+# record in them is already in the .json.
+!results/held-out-*.json
+!results/dev-hosted.json
+!results/dev-hosted.metrics.json
+# The reservation ledger is committed on purpose. It is the only record that
+# the held-out set was spent once, and that a released reservation was
+# superseded rather than deleted. Keeping it private would make the rule
+# unverifiable by a reader.
 reports/
 *.gguf

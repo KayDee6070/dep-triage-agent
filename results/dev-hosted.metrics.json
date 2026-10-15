@@ -1,0 +1,3477 @@
+{
+  "paired": {
+    "always_lookup": {
+      "clean": {
+        "discordant_pairs": 3,
+        "excluded_ungradable": 0,
+        "losses": 1,
+        "mcnemar_exact_p": 1.0,
+        "paired_gradable": 20,
+        "ties": 17,
+        "total_pairs": 20,
+        "wins": 2
+      }
+    },
+    "no_agent": {
+      "clean": {
+        "discordant_pairs": 3,
+        "excluded_ungradable": 0,
+        "losses": 2,
+        "mcnemar_exact_p": 1.0,
+        "paired_gradable": 20,
+        "ties": 17,
+        "total_pairs": 20,
+        "wins": 1
+      }
+    }
+  },
+  "systems": {
+    "agent": {
+      "clean": {
+        "by_class": {
+          "minimum_safe_version": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "package_unknown": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "python_upgrade": {
+            "correct": 1,
+            "correct_over_total": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "incorrect": 1,
+            "task_accuracy": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "single_package_overcall": {
+            "correct": 3,
+            "correct_over_total": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "total": 3,
+            "ungradable": {
+              "ci95": [
+                5.551115123125783e-17,
+                0.5614970317550454
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "version_unpublished": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "vulnerable_affected": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "vulnerable_clean": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "which_vulnerable": {
+            "correct": 3,
+            "correct_over_total": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "total": 3,
+            "ungradable": {
+              "ci95": [
+                5.551115123125783e-17,
+                0.5614970317550454
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          }
+        },
+        "correct": 18,
+        "correct_over_total": {
+          "ci95": [
+            0.6989663547715128,
+            0.9721335187862319
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": true,
+          "numerator": 18,
+          "value": 0.9
+        },
+        "cost": {
+          "executed_calls": {
+            "mean": 2.75,
+            "n": 20
+          },
+          "tool_calls": {
+            "mean": 2.9,
+            "n": 20
+          }
+        },
+        "d1": {
+          "first_call_accuracy": {
+            "ci95": [
+              0.7411670330319684,
+              1.0
+            ],
+            "denominator": 11,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 11,
+            "value": 1.0
+          },
+          "footnote_exact_set_match": {
+            "ci95": [
+              0.6395811352592431,
+              0.9476312541037835
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 17,
+            "value": 0.85
+          },
+          "invalid_argument_rate": {
+            "ci95": [
+              0.0,
+              0.062117855787202914
+            ],
+            "denominator": 58,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "negative_conflation_rate": {
+            "ci95": [
+              5.551115123125783e-17,
+              0.35433043506668743
+            ],
+            "denominator": 7,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "no_tool_discipline": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "reference_path_not_minimality": true,
+          "tool_precision": {
+            "mean": 1.0,
+            "n": 20
+          },
+          "tool_recall": {
+            "mean": 0.925,
+            "n": 20
+          }
+        },
+        "d2": {
+          "applied": 0,
+          "behaviours": {
+            "abstained": 0,
+            "crashed": 0,
+            "fabricated": 0,
+            "retried_same_tool": 0,
+            "switched_tool": 0
+          },
+          "changed_payload": 0,
+          "graceful_abstention_rate": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "impossibility_not_established": 0,
+          "observed_abstentions": 0,
+          "planned": 0,
+          "recovery_means_correct_under_fault_not_proof_of_retry": true,
+          "recovery_rate": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "unchanged_payload": 0,
+          "unclassified": 0,
+          "ungradable_after_fault": 0,
+          "untriggered": 0
+        },
+        "d3": {
+          "over_call_ratio": {
+            "mean": 1.42,
+            "n": 20
+          },
+          "repeat_call_rate": {
+            "ci95": [
+              0.0,
+              0.16112515805281938
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "steps_to_answer": {
+            "observed": {
+              "1": 11,
+              "10": 1,
+              "3": 2,
+              "4": 3,
+              "5": 2,
+              "9": 1
+            },
+            "reference": {
+              "1": 11,
+              "2": 4,
+              "3": 2,
+              "5": 3
+            },
+            "unit": "tool call attempts, including refusals and nonanswers"
+          },
+          "termination_rate": {
+            "ci95": [
+              0.6989663547715128,
+              0.9721335187862319
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 18,
+            "value": 0.9
+          }
+        },
+        "existence_probe_traces": [
+          "minsafe-deep-01/clean",
+          "minsafe-deep-02/clean"
+        ],
+        "fabrication": {
+          "assertion_interval_caveat": "descriptive binomial interval; assertions within a task are dependent",
+          "detector_validated": false,
+          "fabrication_hard": 0,
+          "fabrication_misattributed": 0,
+          "fabrication_per_assertion": {
+            "ci95": [
+              2.7755575615628914e-17,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "fabrication_per_task": {
+            "ci95": [
+              0.0,
+              0.16112515805281938
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "unattributed_assertions": 0
+        },
+        "fallback_rate": {
+          "ci95": [
+            0.0,
+            0.16112515805281938
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "incorrect": 2,
+        "per_task": [
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "affected-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_affected",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "affected-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_affected",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "clean-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_clean",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "clean-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_clean",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "tqdm",
+                "value": "4.66.3"
+              }
+            ],
+            "behaviour": null,
+            "calls": 5,
+            "case": "minsafe-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 5,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 2.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "django",
+                "value": "6.1.1"
+              }
+            ],
+            "behaviour": null,
+            "calls": 3,
+            "case": "minsafe-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "pydantic",
+                "value": "1.6.2"
+              }
+            ],
+            "behaviour": null,
+            "calls": 9,
+            "case": "minsafe-deep-01/clean",
+            "correct": false,
+            "exact_set_match": true,
+            "executed_calls": 8,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 4.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version_deep",
+            "terminated": false,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "grpcio",
+                "value": "1.53.2"
+              }
+            ],
+            "behaviour": null,
+            "calls": 3,
+            "case": "minsafe-deep-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version_deep",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "overcall-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "overcall-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "overcall-03/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "pyyaml",
+                "value": "5.4"
+              }
+            ],
+            "behaviour": null,
+            "calls": 5,
+            "case": "pyupgrade-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 5,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.6666666666666667,
+            "repeated": false,
+            "task_class": "python_upgrade",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "pymongo",
+                "value": "4.18.2"
+              }
+            ],
+            "behaviour": null,
+            "calls": 10,
+            "case": "pyupgrade-02/clean",
+            "correct": false,
+            "exact_set_match": true,
+            "executed_calls": 8,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.3333333333333335,
+            "repeated": false,
+            "task_class": "python_upgrade",
+            "terminated": false,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unknown-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "package_unknown",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unknown-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "package_unknown",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unpublished-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "version_unpublished",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unpublished-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "version_unpublished",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 4,
+            "case": "which-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 4,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.8,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 4,
+            "case": "which-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 4,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.8,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 4,
+            "case": "which-03/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 4,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.8,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          }
+        ],
+        "task_accuracy": {
+          "ci95": [
+            0.6989663547715128,
+            0.9721335187862319
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 18,
+          "value": 0.9
+        },
+        "total": 20,
+        "ungradable": {
+          "ci95": [
+            0.0,
+            0.16112515805281938
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "ungradable_count": 0,
+        "version_answers": {
+          "ambiguous": {
+            "ci95": [
+              0.0,
+              0.4898908364545973
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "columns_overlap": true,
+          "lenient": {
+            "ci95": [
+              0.30064184258240184,
+              0.9544127391902995
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 3,
+            "value": 0.75
+          },
+          "strict": {
+            "ci95": [
+              0.30064184258240184,
+              0.9544127391902995
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 3,
+            "value": 0.75
+          },
+          "total": 4,
+          "ungradable": 0
+        }
+      }
+    },
+    "always_lookup": {
+      "clean": {
+        "by_class": {
+          "minimum_safe_version": {
+            "correct": 1,
+            "correct_over_total": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "incorrect": 1,
+            "task_accuracy": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "package_unknown": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "python_upgrade": {
+            "correct": 1,
+            "correct_over_total": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "incorrect": 1,
+            "task_accuracy": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "single_package_overcall": {
+            "correct": 3,
+            "correct_over_total": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "total": 3,
+            "ungradable": {
+              "ci95": [
+                5.551115123125783e-17,
+                0.5614970317550454
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "version_unpublished": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "vulnerable_affected": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "vulnerable_clean": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "which_vulnerable": {
+            "correct": 3,
+            "correct_over_total": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "total": 3,
+            "ungradable": {
+              "ci95": [
+                5.551115123125783e-17,
+                0.5614970317550454
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          }
+        },
+        "correct": 17,
+        "correct_over_total": {
+          "ci95": [
+            0.6395811352592431,
+            0.9476312541037835
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": true,
+          "numerator": 17,
+          "value": 0.85
+        },
+        "cost": {
+          "executed_calls": {
+            "mean": 1.75,
+            "n": 20
+          },
+          "tool_calls": {
+            "mean": 1.75,
+            "n": 20
+          }
+        },
+        "d1": {
+          "first_call_accuracy": {
+            "ci95": [
+              0.7411670330319684,
+              1.0
+            ],
+            "denominator": 11,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 11,
+            "value": 1.0
+          },
+          "footnote_exact_set_match": {
+            "ci95": [
+              0.34208534245034233,
+              0.7418021417443759
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 11,
+            "value": 0.55
+          },
+          "invalid_argument_rate": {
+            "ci95": [
+              6.938893903907228e-18,
+              0.09890099232440402
+            ],
+            "denominator": 35,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "negative_conflation_rate": {
+            "ci95": [
+              5.551115123125783e-17,
+              0.35433043506668743
+            ],
+            "denominator": 7,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "no_tool_discipline": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "reference_path_not_minimality": true,
+          "tool_precision": {
+            "mean": 1.0,
+            "n": 20
+          },
+          "tool_recall": {
+            "mean": 0.7583333333333333,
+            "n": 20
+          }
+        },
+        "d2": {
+          "applied": 0,
+          "behaviours": {
+            "abstained": 0,
+            "crashed": 0,
+            "fabricated": 0,
+            "retried_same_tool": 0,
+            "switched_tool": 0
+          },
+          "changed_payload": 0,
+          "graceful_abstention_rate": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "impossibility_not_established": 0,
+          "observed_abstentions": 0,
+          "planned": 0,
+          "recovery_means_correct_under_fault_not_proof_of_retry": true,
+          "recovery_rate": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "unchanged_payload": 0,
+          "unclassified": 0,
+          "ungradable_after_fault": 0,
+          "untriggered": 0
+        },
+        "d3": {
+          "over_call_ratio": {
+            "mean": 1.1033333333333333,
+            "n": 20
+          },
+          "repeat_call_rate": {
+            "ci95": [
+              0.0,
+              0.16112515805281938
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "steps_to_answer": {
+            "observed": {
+              "1": 14,
+              "3": 3,
+              "4": 3
+            },
+            "reference": {
+              "1": 11,
+              "2": 4,
+              "3": 2,
+              "5": 3
+            },
+            "unit": "tool call attempts, including refusals and nonanswers"
+          },
+          "termination_rate": {
+            "ci95": [
+              0.8388748419471806,
+              1.0
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 20,
+            "value": 1.0
+          }
+        },
+        "existence_probe_traces": [
+          "minsafe-deep-01/clean",
+          "minsafe-deep-02/clean"
+        ],
+        "fabrication": {
+          "assertion_interval_caveat": "descriptive binomial interval; assertions within a task are dependent",
+          "detector_validated": false,
+          "fabrication_hard": 0,
+          "fabrication_misattributed": 0,
+          "fabrication_per_assertion": {
+            "ci95": [
+              5.551115123125783e-17,
+              0.35433043506668743
+            ],
+            "denominator": 7,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "fabrication_per_task": {
+            "ci95": [
+              0.0,
+              0.16112515805281938
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "unattributed_assertions": 0
+        },
+        "fallback_rate": {
+          "ci95": [
+            0.0,
+            0.16112515805281938
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "incorrect": 3,
+        "per_task": [
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "affected-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_affected",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "affected-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_affected",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "clean-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_clean",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "clean-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "vulnerable_clean",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "tqdm",
+                "value": "4.66.3"
+              }
+            ],
+            "behaviour": null,
+            "calls": 1,
+            "case": "minsafe-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "django",
+                "value": "5.2.17"
+              },
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "django",
+                "value": "6.0.8"
+              },
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "django",
+                "value": "6.1.1"
+              }
+            ],
+            "behaviour": null,
+            "calls": 1,
+            "case": "minsafe-02/clean",
+            "correct": false,
+            "exact_set_match": false,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "pydantic",
+                "value": "1.6.2"
+              }
+            ],
+            "behaviour": null,
+            "calls": 1,
+            "case": "minsafe-deep-01/clean",
+            "correct": false,
+            "exact_set_match": false,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version_deep",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "grpcio",
+                "value": "1.53.2"
+              }
+            ],
+            "behaviour": null,
+            "calls": 1,
+            "case": "minsafe-deep-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version_deep",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "overcall-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "overcall-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "overcall-03/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "pyupgrade-01/clean",
+            "correct": false,
+            "exact_set_match": false,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.3333333333333333,
+            "repeated": false,
+            "task_class": "python_upgrade",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.3333333333333333
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "pymongo",
+                "value": "4.18.2"
+              }
+            ],
+            "behaviour": null,
+            "calls": 1,
+            "case": "pyupgrade-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.3333333333333333,
+            "repeated": false,
+            "task_class": "python_upgrade",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.3333333333333333
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unknown-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "package_unknown",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unknown-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "package_unknown",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unpublished-01/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "version_unpublished",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 1,
+            "case": "unpublished-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 1,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "version_unpublished",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 4,
+            "case": "which-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 4,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.8,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 4,
+            "case": "which-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 4,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.8,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 4,
+            "case": "which-03/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 4,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 0.8,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 0.5
+          }
+        ],
+        "task_accuracy": {
+          "ci95": [
+            0.6395811352592431,
+            0.9476312541037835
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 17,
+          "value": 0.85
+        },
+        "total": 20,
+        "ungradable": {
+          "ci95": [
+            0.0,
+            0.16112515805281938
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "ungradable_count": 0,
+        "version_answers": {
+          "ambiguous": {
+            "ci95": [
+              0.0,
+              0.4898908364545973
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "columns_overlap": true,
+          "lenient": {
+            "ci95": [
+              0.15003898915214947,
+              0.8499610108478506
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 2,
+            "value": 0.5
+          },
+          "strict": {
+            "ci95": [
+              0.15003898915214947,
+              0.8499610108478506
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 2,
+            "value": 0.5
+          },
+          "total": 4,
+          "ungradable": 0
+        }
+      }
+    },
+    "no_agent": {
+      "clean": {
+        "by_class": {
+          "minimum_safe_version": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "package_unknown": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "python_upgrade": {
+            "correct": 1,
+            "correct_over_total": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "incorrect": 1,
+            "task_accuracy": {
+              "ci95": [
+                0.09453120573423074,
+                0.9054687942657693
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 1,
+              "value": 0.5
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "single_package_overcall": {
+            "correct": 3,
+            "correct_over_total": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "total": 3,
+            "ungradable": {
+              "ci95": [
+                5.551115123125783e-17,
+                0.5614970317550454
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "version_unpublished": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "vulnerable_affected": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "vulnerable_clean": {
+            "correct": 2,
+            "correct_over_total": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 2,
+              "value": 1.0
+            },
+            "total": 2,
+            "ungradable": {
+              "ci95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "denominator": 2,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          },
+          "which_vulnerable": {
+            "correct": 3,
+            "correct_over_total": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": true,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "incorrect": 0,
+            "task_accuracy": {
+              "ci95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 3,
+              "value": 1.0
+            },
+            "total": 3,
+            "ungradable": {
+              "ci95": [
+                5.551115123125783e-17,
+                0.5614970317550454
+              ],
+              "denominator": 3,
+              "interval_method": "Wilson",
+              "lower_bound": false,
+              "numerator": 0,
+              "value": 0.0
+            },
+            "ungradable_count": 0
+          }
+        },
+        "correct": 19,
+        "correct_over_total": {
+          "ci95": [
+            0.763868806553258,
+            0.9911185511992047
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": true,
+          "numerator": 19,
+          "value": 0.95
+        },
+        "cost": {
+          "executed_calls": {
+            "mean": 5.55,
+            "n": 20
+          },
+          "tool_calls": {
+            "mean": 5.55,
+            "n": 20
+          }
+        },
+        "d1": {
+          "first_call_accuracy": {
+            "ci95": [
+              0.43435469882387084,
+              0.902539407099751
+            ],
+            "denominator": 11,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 8,
+            "value": 0.7272727272727273
+          },
+          "footnote_exact_set_match": {
+            "ci95": [
+              0.027866481213768224,
+              0.3010336452284873
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 2,
+            "value": 0.1
+          },
+          "invalid_argument_rate": {
+            "ci95": [
+              3.469446951953614e-18,
+              0.03345010469339235
+            ],
+            "denominator": 111,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "negative_conflation_rate": {
+            "ci95": [
+              5.551115123125783e-17,
+              0.35433043506668743
+            ],
+            "denominator": 7,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "no_tool_discipline": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "reference_path_not_minimality": true,
+          "tool_precision": {
+            "mean": 0.47916666666666663,
+            "n": 20
+          },
+          "tool_recall": {
+            "mean": 1.0,
+            "n": 20
+          }
+        },
+        "d2": {
+          "applied": 0,
+          "behaviours": {
+            "abstained": 0,
+            "crashed": 0,
+            "fabricated": 0,
+            "retried_same_tool": 0,
+            "switched_tool": 0
+          },
+          "changed_payload": 0,
+          "graceful_abstention_rate": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "impossibility_not_established": 0,
+          "observed_abstentions": 0,
+          "planned": 0,
+          "recovery_means_correct_under_fault_not_proof_of_retry": true,
+          "recovery_rate": {
+            "ci95": null,
+            "denominator": 0,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": null
+          },
+          "unchanged_payload": 0,
+          "unclassified": 0,
+          "ungradable_after_fault": 0,
+          "untriggered": 0
+        },
+        "d3": {
+          "over_call_ratio": {
+            "mean": 3.4899999999999998,
+            "n": 20
+          },
+          "repeat_call_rate": {
+            "ci95": [
+              0.0,
+              0.16112515805281938
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "steps_to_answer": {
+            "observed": {
+              "10": 3,
+              "13": 3,
+              "3": 14
+            },
+            "reference": {
+              "1": 11,
+              "2": 4,
+              "3": 2,
+              "5": 3
+            },
+            "unit": "tool call attempts, including refusals and nonanswers"
+          },
+          "termination_rate": {
+            "ci95": [
+              0.8388748419471806,
+              1.0
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 20,
+            "value": 1.0
+          }
+        },
+        "existence_probe_traces": [
+          "minsafe-deep-01/clean",
+          "minsafe-deep-02/clean"
+        ],
+        "fabrication": {
+          "assertion_interval_caveat": "descriptive binomial interval; assertions within a task are dependent",
+          "detector_validated": false,
+          "fabrication_hard": 0,
+          "fabrication_misattributed": 0,
+          "fabrication_per_assertion": {
+            "ci95": [
+              0.0,
+              0.4898908364545973
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "fabrication_per_task": {
+            "ci95": [
+              0.0,
+              0.16112515805281938
+            ],
+            "denominator": 20,
+            "interval_method": "Wilson",
+            "lower_bound": true,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "unattributed_assertions": 0
+        },
+        "fallback_rate": {
+          "ci95": [
+            0.0,
+            0.16112515805281938
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "incorrect": 1,
+        "per_task": [
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "affected-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "vulnerable_affected",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "affected-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "vulnerable_affected",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "clean-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "vulnerable_clean",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "clean-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "vulnerable_clean",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "tqdm",
+                "value": "4.66.3"
+              }
+            ],
+            "behaviour": null,
+            "calls": 3,
+            "case": "minsafe-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version",
+            "terminated": true,
+            "tool_precision": 0.6666666666666666,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "django",
+                "value": "6.1.1"
+              }
+            ],
+            "behaviour": null,
+            "calls": 3,
+            "case": "minsafe-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version",
+            "terminated": true,
+            "tool_precision": 0.6666666666666666,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "pydantic",
+                "value": "1.10.13"
+              }
+            ],
+            "behaviour": null,
+            "calls": 3,
+            "case": "minsafe-deep-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version_deep",
+            "terminated": true,
+            "tool_precision": 0.6666666666666666,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [
+              {
+                "classification": "supported",
+                "kind": "version",
+                "package": "grpcio",
+                "value": "1.53.2"
+              }
+            ],
+            "behaviour": null,
+            "calls": 3,
+            "case": "minsafe-deep-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.5,
+            "repeated": false,
+            "task_class": "minimum_safe_version_deep",
+            "terminated": true,
+            "tool_precision": 0.6666666666666666,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 10,
+            "case": "overcall-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 10,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": false,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 10.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 0.25,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 10,
+            "case": "overcall-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 10,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": false,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 10.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 0.25,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 10,
+            "case": "overcall-03/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 10,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": false,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 10.0,
+            "repeated": false,
+            "task_class": "single_package_overcall",
+            "terminated": true,
+            "tool_precision": 0.25,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "pyupgrade-01/clean",
+            "correct": false,
+            "exact_set_match": true,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "python_upgrade",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "pyupgrade-02/clean",
+            "correct": true,
+            "exact_set_match": true,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 1.0,
+            "repeated": false,
+            "task_class": "python_upgrade",
+            "terminated": true,
+            "tool_precision": 1.0,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "unknown-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "package_unknown",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "unknown-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "package_unknown",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "unpublished-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "version_unpublished",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 3,
+            "case": "unpublished-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 3,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": true,
+            "invalid_arguments": 0,
+            "negative_conflation": false,
+            "no_tool_correct": null,
+            "over_call_ratio": 3.0,
+            "repeated": false,
+            "task_class": "version_unpublished",
+            "terminated": true,
+            "tool_precision": 0.3333333333333333,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 13,
+            "case": "which-01/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 13,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 2.6,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 0.5,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 13,
+            "case": "which-02/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 13,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 2.6,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 0.5,
+            "tool_recall": 1.0
+          },
+          {
+            "abstained": false,
+            "ambiguous": false,
+            "assertions": [],
+            "behaviour": null,
+            "calls": 13,
+            "case": "which-03/clean",
+            "correct": true,
+            "exact_set_match": false,
+            "executed_calls": 13,
+            "fabricated": false,
+            "fabrication_hard": 0,
+            "fabrication_misattributed": 0,
+            "fault_applied": false,
+            "fault_payload_changed": null,
+            "first_call_correct": null,
+            "invalid_arguments": 0,
+            "negative_conflation": null,
+            "no_tool_correct": null,
+            "over_call_ratio": 2.6,
+            "repeated": false,
+            "task_class": "which_vulnerable",
+            "terminated": true,
+            "tool_precision": 0.5,
+            "tool_recall": 1.0
+          }
+        ],
+        "task_accuracy": {
+          "ci95": [
+            0.763868806553258,
+            0.9911185511992047
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 19,
+          "value": 0.95
+        },
+        "total": 20,
+        "ungradable": {
+          "ci95": [
+            0.0,
+            0.16112515805281938
+          ],
+          "denominator": 20,
+          "interval_method": "Wilson",
+          "lower_bound": false,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "ungradable_count": 0,
+        "version_answers": {
+          "ambiguous": {
+            "ci95": [
+              0.0,
+              0.4898908364545973
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 0,
+            "value": 0.0
+          },
+          "columns_overlap": true,
+          "lenient": {
+            "ci95": [
+              0.5101091635454027,
+              1.0
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 4,
+            "value": 1.0
+          },
+          "strict": {
+            "ci95": [
+              0.5101091635454027,
+              1.0
+            ],
+            "denominator": 4,
+            "interval_method": "Wilson",
+            "lower_bound": false,
+            "numerator": 4,
+            "value": 1.0
+          },
+          "total": 4,
+          "ungradable": 0
+        }
+      }
+    }
+  }
+}

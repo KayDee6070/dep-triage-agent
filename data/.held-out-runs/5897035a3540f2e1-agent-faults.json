@@ -1,0 +1,14 @@
+{
+  "model": "openai/gpt-oss-120b",
+  "state": "released; produced zero gradable records",
+  "history": [
+    {
+      "previous_state": "reserved; do not rerun",
+      "released_at": "2026-10-15T19:58:10.367990+00:00",
+      "reason": "Groq returned HTTP 403 'Access denied' to every request; no task reached the model, so no answer or score was observed",
+      "artifact": "results/held-out-hosted-faults.json",
+      "records": 180,
+      "gradable_records": 0
+    }
+  ]
+}
