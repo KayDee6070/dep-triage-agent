@@ -17,7 +17,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python AS runtime
 WORKDIR /app
-ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
+    DEP_TRIAGE_REPORT_PATH=/app/report.html
 RUN groupadd --gid 1000 triage \
     && useradd --uid 1000 --gid 1000 --create-home --shell /usr/sbin/nologin triage \
     && mkdir /app/results \
@@ -28,6 +29,15 @@ RUN groupadd --gid 1000 triage \
 COPY --from=builder /app/.venv /app/.venv
 COPY data/fixture ./data/fixture
 COPY data/tasks.json ./data/tasks.json
+
+# The landing page ships pre-rendered, outside the writable results directory.
+# Shipping evaluation JSON instead would make the page depend on parsing an
+# artifact at startup, and the page is the project's evidence.
+COPY results/report.html ./report.html
+
 USER 1000:1000
+EXPOSE 8000
 ENTRYPOINT ["dep-triage"]
-CMD ["--help"]
+# Serving is the deployed purpose. Any other subcommand overrides this, which
+# is how the offline acceptance checks invoke `version`.
+CMD ["serve", "--host", "0.0.0.0", "--port", "8000"]

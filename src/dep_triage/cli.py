@@ -140,5 +140,50 @@ def evaluate(
     typer.echo(f"Wrote {destination} ({len(report['records'])} executions)")
 
 
+@app.command()
+def report(
+    clean: Annotated[
+        Path | None, typer.Option(help="Clean evaluation run file (default: newest known).")
+    ] = None,
+    faults: Annotated[Path | None, typer.Option(help="Fault-arm run file.")] = None,
+    output: Annotated[Path, typer.Option(help="Where to write the HTML.")] = Path(
+        "results/report.html"
+    ),
+) -> None:
+    """Render the static evaluation report from committed run artifacts."""
+    from dep_triage.service.app import build_report_html
+    from dep_triage.service.report import render_from_paths
+
+    html = (
+        render_from_paths(clean, faults)
+        if clean is not None
+        else build_report_html(Settings(report_path=Path("/nonexistent")))
+    )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(html, encoding="utf-8")
+    typer.echo(f"Wrote {output} ({len(html):,} bytes)")
+
+
+@app.command()
+def serve(
+    host: Annotated[str, typer.Option(help="Bind address.")] = "0.0.0.0",
+    port: Annotated[int, typer.Option(help="Bind port.")] = 8000,
+) -> None:
+    """Run the service: static report, live agent, health and metrics.
+
+    Binds all interfaces by default because the only intended use is inside a
+    container, where binding loopback would make the service unreachable.
+    """
+    import uvicorn
+
+    uvicorn.run(
+        "dep_triage.service.app:app_factory",
+        factory=True,
+        host=host,
+        port=port,
+        access_log=False,  # structlog already records each request outcome
+    )
+
+
 if __name__ == "__main__":  # pragma: no cover
     app()

@@ -9,9 +9,9 @@ harness that measures whether it actually works.**
 
 | | |
 |---|---|
-| **State** | **M5 complete** — agent and harness run in Docker from a clean checkout; M6 deployment next |
+| **State** | **M6 complete** — service built, hardened and verified in-container. **Not published**; held-out set not yet run. |
 | Schedule | No deadline; the six definition-of-done criteria are the stopping line |
-| Tests | 267 offline tests plus Docker acceptance checks; ruff clean; strict mypy on 45 files |
+| Tests | 302, ruff clean, mypy `strict` on 51 files |
 | Clone to green | **18 s** cold cache (budget 60 s) |
 | Fixture | 80 packages, 1487 advisories, snapshot 2026-10-09 |
 | Results | [M3 measurements](docs/milestones/M3-report.md), [M4 diagnosis](docs/milestones/M4-report.md); no final result yet |
@@ -367,6 +367,39 @@ the 20–30 minute estimate for a 60-task run stands. The determinism result is 
 three systems.
 
 ---
+
+## Service
+
+| Endpoint | Guarantee |
+|---|---|
+| `GET /` | The static evaluation report. **Always available** — pre-rendered into the image, no runtime dependency. |
+| `POST /ask` | The live agent. Best-effort: 503 with a notice when the backend is unreachable. |
+| `GET /health` | Liveness and current demo-quota usage. |
+| `GET /metrics` | Prometheus exposition. |
+
+Verified in a hardened container (`--network none --read-only --cap-drop ALL`):
+the report serves, `/ask` degrades to a notice with no traceback, and the
+report still serves afterwards.
+
+**Demo caps are enforced before the model is reached** — a global daily limit
+and a per-client per-minute limit, both returning 429 with `Retry-After`. They
+are in-memory and therefore per process, which is correct for one container and
+wrong for any replicated deployment.
+
+**Nothing scrapes `/metrics` in the deployment.** The endpoint is real and
+tested; no Prometheus instance runs against it. Honest instrumentation, not a
+monitoring stack.
+
+### Deployment
+
+`deploy/publish_hf_space.sh` packages and publishes to Hugging Face Spaces;
+**dry-run by default**, `--confirm` to publish. Hugging Face was chosen because
+it needs no card and therefore cannot die of billing — M0 ranks survivability
+above every other property.
+
+`deploy/azure.sh` deploys to Azure Container Apps and **has never been run.**
+It exists because the target job ads name Azure. An unrun script is weak
+evidence and that is stated rather than implied.
 
 ## Target interface
 

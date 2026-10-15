@@ -80,6 +80,18 @@ class Settings(BaseSettings):
     # --- data --------------------------------------------------------------
     fixture_path: Path = Path("data/fixture")
 
+    #: Pre-rendered report HTML. Rendered at image build time so the deployed
+    #: service has **no** runtime dependency on evaluation JSON — the landing
+    #: page is the project's evidence and must not be able to fail. If absent,
+    #: the service falls back to rendering from run artifacts.
+    report_path: Path = Path("results/report.html")
+
+    #: Where evaluation run artifacts live. Only used as a fallback when no
+    #: pre-rendered report is present, and kept a setting rather than a
+    #: hardcoded relative path so the service does not depend on the working
+    #: directory it happens to be started from.
+    results_dir: Path = Path("results")
+
     # --- service -----------------------------------------------------------
     log_level: LogLevel = "INFO"
     enable_metrics: bool = True

@@ -65,3 +65,20 @@ jobs:
             --tmpfs /tmp:rw,nosuid,noexec,size=64m \
             --cap-drop ALL --security-opt no-new-privileges \
             --entrypoint python dep-triage-agent:ci - < scripts/smoke_container.py
+
+      - name: Offline service acceptance
+        # The service must serve its report and degrade /ask to a notice with
+        # no backend reachable. That asymmetry is what the deployment relies on.
+        run: |
+          docker run --rm -i --network none --read-only \
+            --tmpfs /tmp:rw,nosuid,noexec,size=64m \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --entrypoint python dep-triage-agent:ci - < scripts/smoke_service.py
+
+      - name: Deploy scripts are valid and refuse to publish by default
+        run: |
+          bash -n deploy/publish_hf_space.sh
+          bash -n deploy/azure.sh
+          SPACE_ID=ci/dry-run ./deploy/publish_hf_space.sh | tee /tmp/hf.log
+          grep -q "DRY RUN" /tmp/hf.log
+          grep -q "secret scan: clean" /tmp/hf.log

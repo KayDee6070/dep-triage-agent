@@ -9,3 +9,6 @@
 !src/**/*.py
 !data/tasks.json
 !data/fixture/*.json
+# Pre-rendered report only. Evaluation JSON stays out of the image:
+# the deployed service must not parse an artifact to serve its landing page.
+!results/report.html

@@ -329,3 +329,40 @@ Full diagnosis and limits: [M4 report](docs/milestones/M4-report.md).
   Corrected the test after inspecting actual CLI output, not production logic.
 - **Prior documentation error:** the handoff claimed `deploy/azure.sh` already
   existed. It remains an M6 obligation; the handoff now states that explicitly.
+
+---
+
+## M6 — Service, observability, deployment artifacts
+
+### My decisions
+
+| Decision | Choice |
+|---|---|
+| Publication | **Not yet.** Publishing makes the report, agent and fixture public and exposes a live endpoint; that stays my call. |
+| Repository visibility | Private, unchanged. |
+
+### AI-assisted
+
+- FastAPI service with the deliberate failure asymmetry: the report always
+  serves, `/ask` is best-effort.
+- structlog JSON logging with redaction; Prometheus collectors fed from the
+  same `ToolCallRecord` data the eval harness scores, so the two cannot
+  disagree about what a step is.
+- Rate limiting with a global daily cap and a per-client per-minute cap.
+- Static report generator, self-contained, no charts — at ±15-point intervals
+  bars would imply precision the data lacks.
+- `deploy/publish_hf_space.sh` and `deploy/azure.sh`, both dry-run by default.
+- CI: offline service acceptance in the image, plus a dry-run asserting the
+  publish script refuses to publish and its secret scan passes.
+
+### Errors found and corrected
+
+- **The service resolved data paths relative to the working directory**, and
+  the Dockerfile copied no evaluation artifacts at all. A deployed container
+  would have served a 332-byte placeholder as its landing page while reporting
+  `status: ok`, and every local check passed because the working directory
+  happened to be the repository root. Found by the new tests, which run from a
+  temporary directory. Fixed by making the artifact location explicit and
+  shipping the report pre-rendered.
+- Earlier handoff wording of mine implied `deploy/azure.sh` already existed. It
+  did not; M5 flagged that and M6 wrote it.
