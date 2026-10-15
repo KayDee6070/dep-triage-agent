@@ -28,7 +28,7 @@ Revision history is at §16. Everything below is the current plan.
 | Public link | Hugging Face Spaces (Docker SDK) |
 | Cloud evidence | `deploy/azure.sh` committed; running it optional, card-gated |
 | Framework | LangGraph (single agent) + FastAPI |
-| Deadline | **2026-10-21** — 14 days, day 1 = 2026-10-08 |
+| Deadline | **Withdrawn 2026-10-15** — quality over schedule; the §15 definition of done is the stopping line |
 
 ---
 
@@ -712,6 +712,21 @@ Not "polished". Done when all six hold:
 ---
 
 ## 16. Revision history
+
+### 2026-10-15 — deadline withdrawn by Kuntal
+
+Quality over schedule. The 14-day deadline is removed.
+
+Recorded with its consequence rather than as a simple relaxation: the deadline
+was Kuntal's own guard against over-polishing, a failure mode he named in the
+original brief. Deleting it without replacement would remove the stopping line
+the brief explicitly asked for. **The six criteria in §15 are now the stopping
+line**, and the exclusions in §11 hold regardless of available time — a 5th
+tool, multi-agent patterns, RAG, Grafana, Kubernetes and a paid API do not
+become acceptable because the clock is gone.
+
+The cut order in §13 remains available but is no longer forced. The timeline in
+§14 is retained as an ordering of work, not as dates.
 
 ### 2026-10-08 — senior engineer review, round 3
 

@@ -79,38 +79,52 @@ static report and one form · Grafana · fine-tuning.
 
 ---
 
-## 3. SCHEDULE PROBLEM — read this
+## 3. There is no deadline — the Definition of Done is the stopping line
+
+**Changed by Kuntal on 2026-10-15: quality over schedule. The 14-day deadline
+is withdrawn.**
+
+Context the next session needs, because this reverses an earlier instruction.
+The deadline was never external — it was Kuntal's own guard against a failure
+mode he named up front: *"My last project sprawled far past its plan,
+repeatedly"* and *"Not when it's 'polished' — I over-polish and need a stopping
+line."*
+
+Removing the date removes that guard. **Over-polishing is now the live risk,
+not running out of time.** So the guard is replaced rather than deleted:
+
+> **Stop when the six Definition-of-Done criteria in §11 all hold. Not when it
+> feels finished.**
+
+### What this changes
 
 | | |
 |---|---|
-| Started | 2026-10-08 |
-| Deadline | **2026-10-21** (14 days) |
-| Today | 2026-10-15 — **day 8 of 14, 6 days remain** |
-| Last commit | 2026-10-10 |
+| Date pressure | Gone. Milestones take the time they need. |
+| The cut list | **Available, no longer forced.** Prometheus, the 4th tool and the full 60 tasks all stay unless something genuinely blocks. |
+| Owed work | M2 and M3 reports, and the day-5 gates, get done properly rather than skipped. |
+| Scope | **Unchanged.** Every hard rule in §2 still holds. |
 
-**Five days passed with no commits.** The original plan had M3 complete by
-today and M4 starting. Actual state: M3 is ~70% done; M4, M5, M6, M7 untouched.
+### What is still NOT in scope, with unlimited time
 
-### Realistic re-plan for the remaining 6 days
+This list matters more now than it did under a deadline. None of these become
+acceptable just because there is no clock:
 
-| Day | Date | Work |
-|---|---|---|
-| 1 | Wed 15 Oct | Finish M3: fault suite, metrics module, `dep-triage eval` |
-| 2 | Thu 16 Oct | M4 — measure on **dev only**, diagnose, re-measure |
-| 3 | Fri 17 Oct | M5 Dockerise (**needs Docker installed — see §9**) |
-| 4 | Sat 18 Oct | M6 deploy to HF Spaces + logging/metrics |
-| 5 | Sun 19 Oct | **Held-out run (ONCE)** · regenerate report · redeploy |
-| 6 | Mon 20 Oct | M7 docs, `scripts/study_*.py`, README, CONTRIBUTIONS |
+- A 5th tool · multi-agent or supervisor patterns · vector DB / RAG
+- Any web UI beyond the static report and one form · Grafana
+- Kubernetes · Terraform · fine-tuning · a paid API
+- More than 60 tasks (measured: 80 held-out only tightens the interval from
+  ~±15 pp to ~±11 pp — see §7. More tasks is not the fix.)
+- Prompt or tool changes aimed at improving a number
+- Re-running the held-out 40 for any reason
 
-That leaves one spare day before the deadline. **The cut list is the buffer:**
+**If Kuntal pushes to add any of these, push back.** He asked for that
+explicitly, and he asked for it to apply to himself.
 
-1. Prometheus `/metrics` endpoint (keep structlog JSON logging)
-2. The 4th tool `check_compatibility` — costs the multi-hop class
-3. 60 tasks → 40
-
-**Never cut:** the held-out split, or the baselines. They are the differentiator.
-
----
+### For reference, not as pressure
+Started 2026-10-08. Five days passed with no commits (2026-10-10 to 10-15).
+M3 is roughly 70% done; M4 through M7 are untouched. Remaining order of work is
+in §11 — follow the order, ignore the dates.
 
 ## 4. Current state — what exists
 

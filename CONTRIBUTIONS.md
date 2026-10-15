@@ -173,3 +173,22 @@ curation, which was the point of reviewing at this moment:
 - **Two self-inflicted shell mistakes.** `pgrep -f` / `pkill -f` match the
   agent's own command line and killed the session twice. `pgrep -x` is the
   correct form; recorded in memory.
+
+---
+
+## 2026-10-15 — deadline withdrawn
+
+### My decision
+
+| Decision | Choice |
+|---|---|
+| Schedule | **Deadline withdrawn.** Functional and good quality over hitting a date. |
+
+### AI-assisted
+
+- Flagged that the deadline was my own guard against over-polishing — named in
+  the original brief — and that deleting it without a replacement would remove
+  the stopping line I had asked for.
+- Proposed and recorded the replacement: the six-point definition of done
+  becomes the stopping line, and the scope exclusions hold regardless of
+  available time.
