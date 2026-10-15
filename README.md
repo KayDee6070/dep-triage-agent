@@ -9,15 +9,17 @@ harness that measures whether it actually works.**
 
 | | |
 |---|---|
-| **State** | **M4 complete** — development diagnosis finished without tuning; M5 Docker next |
+| **State** | **M5 complete** — agent and harness run in Docker from a clean checkout; M6 deployment next |
 | Schedule | No deadline; the six definition-of-done criteria are the stopping line |
-| Tests | 267 offline tests; ruff clean; strict mypy on 43 files |
+| Tests | 267 offline tests plus Docker acceptance checks; ruff clean; strict mypy on 45 files |
 | Clone to green | **18 s** cold cache (budget 60 s) |
 | Fixture | 80 packages, 1487 advisories, snapshot 2026-10-09 |
 | Results | [M3 measurements](docs/milestones/M3-report.md), [M4 diagnosis](docs/milestones/M4-report.md); no final result yet |
 
-The JSON harness, both baselines, fault suite, and held-out guard work. The
-static HTML report, Docker image, and deployed service are later milestones.
+The JSON harness, both baselines, fault suite, held-out guard, and CLI Docker
+image work. The static HTML report and deployed HTTP service remain later work.
+See [Docker usage](docs/docker.md) and the [M5 report](docs/milestones/M5-report.md)
+for the clean-checkout build, offline checks, and live local smoke evidence.
 
 Current development accuracy: agent **16/20**, `no_agent` **18–19/20**,
 `always_lookup` **18/20**. All 390 saved executions audit clean. M4 diagnoses

@@ -163,9 +163,19 @@ meanwhile.
 
 ---
 
-## 4. Docker — needs root
+## 4. Docker — installed; M5 complete
 
-Required for M5 only. Not needed for anything before that.
+Docker Engine 29.1.3 and Compose 2.40.3 were installed on 2026-10-15.
+Buildx v0.38.0 is installed user-local at `~/.docker/cli-plugins/docker-buildx`;
+its release asset SHA256 was checked before installation. The clean-checkout
+image build and offline/live checks are in the [M5 report](milestones/M5-report.md).
+Use [Docker instructions](docker.md) for the current build and run commands.
+
+The current session may need `sg docker -c 'docker ...'` to apply Kuntal's
+already-granted Docker group. No sudo is needed for normal builds or runs.
+
+For a new machine only, installation of the daemon requires the owner to run
+the following root commands; an assistant session must not attempt sudo:
 
 ```bash
 sudo apt-get update && sudo apt-get install -y docker.io docker-compose-v2

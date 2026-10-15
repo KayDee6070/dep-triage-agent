@@ -1,7 +1,7 @@
 # Contributions
 
 This repository was built with AI assistance (initial work with Claude Opus 5
-via Claude Code; M3 completion and M4 diagnosis with Codex).
+via Claude Code; M3 completion, M4 diagnosis, and M5 Docker with Codex).
 This file separates the decisions I made from the work that was AI-assisted and
 from external review, so that nothing in the repository is ambiguous about its
 origin.
@@ -293,3 +293,39 @@ Full measurements and remaining limitations: [M3 report](docs/milestones/M3-repo
   reconstruction is explicitly distinguished from captured HTTP evidence.
 
 Full diagnosis and limits: [M4 report](docs/milestones/M4-report.md).
+
+---
+
+## M5 — Docker, 2026-10-15
+
+### My decisions
+
+- Requested pushing completed work to GitHub, then continuing with M5.
+- Explicitly chose a **private** `KayDee6070/dep-triage-agent` repository when
+  no remote or matching repository existed. Public deployment remains separate.
+
+### AI-assisted
+
+- Created the approved private repository and pushed the existing history.
+- Built a multi-stage, digest-pinned, locked-dependency CLI container with a
+  non-root runtime, immutable code/data, and no model weights or dev tools.
+- Added Docker-level context-canary and offline acceptance checks to CI.
+- Verified clean-checkout builds, two live dev smoke executions, exact fixture
+  hashes inside the image, output persistence, secret redaction, and failure
+  exit codes. No held-out execution or agent tuning occurred.
+- Installed checksum-verified Buildx user-local, without sudo. Documented local
+  model networking and the need for persistent final-measurement reservations.
+- Wrote the [M5 report](docs/milestones/M5-report.md), including limitations:
+  Linux amd64 only, no byte-identical image claim, no security-scan claim, and
+  an HTTP service still owed at M6.
+
+### Errors found and corrected
+
+- **This assistant's Docker exclusion error:** directory exceptions made the
+  initial allowlist too broad. A real-Docker canary test failed; file-only
+  patterns now exclude all sixteen synthetic canaries. The regression runs in CI.
+- **This assistant's test assumption:** the installed SDK's connection failure
+  is `OpenAIConnectionError`, not the initially guessed `APIConnectionError`.
+  Corrected the test after inspecting actual CLI output, not production logic.
+- **Prior documentation error:** the handoff claimed `deploy/azure.sh` already
+  existed. It remains an M6 obligation; the handoff now states that explicitly.

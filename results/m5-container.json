@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "kind": "packaging_acceptance_not_benchmark_measurement",
+  "observed_on": "2026-10-15",
+  "source_commit": "24b901594de51f69df35f718a70a6e9aac81ae1e",
+  "checkout": {
+    "method": "git clone --no-local from the project repository",
+    "path": "/tmp/dep-triage-m5-clean.qc0tst/fixed",
+    "clean_before_build": true,
+    "host_virtual_environment_present": false
+  },
+  "build": {
+    "command": "docker build --no-cache --progress=plain -t dep-triage-agent:m5-verified .",
+    "exit_code": 0,
+    "wall_seconds": 10.69,
+    "base_images_already_local": true,
+    "buildkit_cache_mount_configured": true,
+    "fully_cold_build_claimed": false,
+    "docker_engine": "29.1.3",
+    "buildx": "v0.38.0",
+    "buildx_asset_sha256": "4fe4cc38adf48169132749b6ca22a990928db0118e3407584ee553723115d287",
+    "python": "3.12.15",
+    "uv": "0.12.23",
+    "python_image": "python:3.12-slim-bookworm@sha256:34386ef0cb081344d7ec1c103ba398e6e9f64e9ab3a1509accc92a4e24a07258",
+    "uv_image": "ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21"
+  },
+  "image": {
+    "tag": "dep-triage-agent:m5-verified",
+    "id_from_docker_inspect": "sha256:bfeb01beef1e471012ca0fb4fb927544ad7d78b6ad2335805b0128cdfa618fd0",
+    "size_bytes_from_docker_inspect": 77294979,
+    "user": "1000:1000",
+    "architecture": "amd64",
+    "installed_distributions": 53,
+    "model_weights_in_image": false,
+    "pushed_to_registry": false
+  },
+  "offline_acceptance": {
+    "exit_code": 0,
+    "network": "none",
+    "root_filesystem_read_only": true,
+    "capabilities_dropped": "ALL",
+    "no_new_privileges": true,
+    "tmpfs": "/tmp:rw,nosuid,noexec,size=64m",
+    "scripted_dev_executions_per_run": 3,
+    "live_model_calls": 0,
+    "dev_dependencies_absent": true,
+    "uv_absent_from_runtime": true,
+    "code_and_data_not_writable_by_app_user": true,
+    "unconfirmed_held_out_cli_exit_code": 1,
+    "unreachable_backend_cli_exit_code": 2,
+    "unreachable_backend_stop_reason": "error:OpenAIConnectionError",
+    "config_api_key_redacted": true,
+    "persistence_and_config_test_image": "dep-triage-agent:m5",
+    "persisted_artifacts_readable_from_second_container": true,
+    "persisted_file_uid": 1000
+  },
+  "build_context_test": {
+    "script": "scripts/check_docker_context.py",
+    "allowed_synthetic_paths": 10,
+    "excluded_canaries": 16,
+    "exit_code": 0,
+    "initial_directory_exception_bug_found_and_fixed": true
+  },
+  "live_dev_smokes": [
+    {
+      "source_commit": "47f3ccb",
+      "image_tag": "dep-triage-agent:m5-clean",
+      "task_id": "affected-01",
+      "question": "Is twisted==25.5.0 vulnerable?",
+      "answer": "ANSWER: VULNERABLE",
+      "tool_calls": 1,
+      "terminated": true,
+      "stop_reason": "end_turn",
+      "cli_reported_duration_s": 6.6,
+      "exit_code": 0
+    },
+    {
+      "source_commit": "24b901594de51f69df35f718a70a6e9aac81ae1e",
+      "image_tag": "dep-triage-agent:m5-verified",
+      "task_id": "affected-01",
+      "question": "Is twisted==25.5.0 vulnerable?",
+      "answer": "ANSWER: VULNERABLE",
+      "tool_calls": 1,
+      "terminated": true,
+      "stop_reason": "end_turn",
+      "cli_reported_duration_s": 1.3,
+      "exit_code": 0
+    }
+  ],
+  "model": {
+    "backend": "host Ollama over Linux host networking",
+    "name": "qwen3:8b",
+    "digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+    "runtime_context_tokens": 4096,
+    "reasoning_effort": "none",
+    "temperature": 0,
+    "seed": 42,
+    "max_steps": 8
+  },
+  "data_sha256_verified_inside_image": {
+    "data/tasks.json": "8c0ef9d7f4ca5081941a5ecddcd3e5ccf9635584ecef52ea2eadd5204ef7b172",
+    "data/fixture/manifest.json": "bec444691dd08446cbd33dcf3ff12dcce3f8bda11602760e7f6ef6613a7feed7",
+    "data/fixture/packages.json": "1623fb30b053dabf248f1b92c697529363f2d61b86e00c7a2265b80f606528d6",
+    "data/fixture/vulnerabilities.json": "d0ce7db61465cd8c762e1521c71786518525dcfeb61e933af900a2c24a1be0a6"
+  },
+  "held_out_executions": 0,
+  "original_held_out_reservation_directory_exists": false
+}

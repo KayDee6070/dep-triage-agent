@@ -1,6 +1,6 @@
 # Handoff — read this first
 
-**Updated 2026-10-15 after M4 completion for a fresh assistant session.**
+**Updated 2026-10-15 after M5 completion for a fresh assistant session.**
 
 Repo: `/home/kuntal/Projects/active/dep-triage-agent`, branch `main`,
 Check `git status` for current commit/worktree state; do not infer it from this file.
@@ -12,7 +12,7 @@ remaining **38** once at the final stage. The old untouched-40 claim was false.
 Historical 18/20 dev results also predate the current allocation. Current
 measurements and source artifacts are in `docs/milestones/M3-report.md`.
 
-**Current next job: M5 Docker.** M3 and M4 are complete. Five clean repeats
+**Current next job: M6 service and deployment.** M3, M4, and M5 are complete. Five clean repeats
 gave agent 16/20, no_agent 18–19/20, always_lookup 18/20. The baseline failed
 the byte-identical gate; three additional repeats and all-metric variance were
 recorded. The model-switch threshold did not trigger. The runtime actually used
@@ -24,6 +24,14 @@ failures are explained in `docs/milestones/M4-report.md`; none justified
 changing the agent. Service defaults explain 4k; 782 matching journal prompts
 show no observed truncation. Baseline variability remains unexplained, with
 cache-state differences observed but not established as the cause.
+
+M5 adds a non-root CLI image, actual-Docker context canaries, and an offline
+container smoke in CI. The corrected recipe builds from clean commit `24b9015`;
+two live dev smokes terminated correctly. No held-out ran. GitHub remote
+`origin` is **private** `https://github.com/KayDee6070/dep-triage-agent`, created
+with Kuntal's approval. Keep it private unless he asks otherwise. The image is
+local, not pushed to a registry. See `docs/milestones/M5-report.md` and
+`docs/docker.md`; the HTTP service still does not exist.
 
 Read in this order: this file → `docs/milestones/M0-scope.md` (the contract) →
 `docs/findings-framing.md` (how results must be reported) → `README.md`.
@@ -139,7 +147,7 @@ explicitly, and he asked for it to apply to himself.
 
 ### For reference, not as pressure
 Started 2026-10-08. Five days passed with no commits (2026-10-10 to 10-15).
-M4 is complete; M5 through M7 remain. Remaining order of work is
+M5 is complete; M6 and M7 remain. Remaining order of work is
 in §11 — follow the order, ignore the dates.
 
 ## 4. Current state — what exists
@@ -152,10 +160,11 @@ in §11 — follow the order, ignore the dates.
 | M2 agent | ✅ `dep-triage ask` works end to end on local Qwen3-8B |
 | M3 eval harness | ✅ complete — metrics, faults, CLI, gates, reports and saved evidence |
 | M4 development diagnosis | ✅ complete — saved-trace audit, four failure diagnoses, runtime investigation |
-| M5 Docker / M6 deploy / M7 docs | ❌ not started |
+| M5 Docker | ✅ clean-checkout build, non-root runtime, offline checks, live dev smoke |
+| M6 deploy / M7 docs | ❌ not started |
 
 ### Numbers
-**267 tests** · ruff clean · mypy `strict` clean on **43 files**.
+**267 tests** plus Docker acceptance/context checks · ruff clean · mypy `strict` clean on **45 files**.
 
 ### Files that matter
 
@@ -544,7 +553,9 @@ has it. If it does not, prefix Docker work with `sg docker -c "..."` rather
 than reaching for `sudo` — `sudo docker` works but writes root-owned files into
 the build context.
 
-Nothing is blocked by this. M5 can proceed.
+M5 used this path successfully. Buildx v0.38.0 is now installed user-local at
+`~/.docker/cli-plugins/docker-buildx`, verified against its release SHA256.
+The Dockerfile and offline acceptance commands are in `docs/docker.md`.
 
 Nothing further is outstanding from Kuntal. Everything needed to reach the
 definition of done is installed.
@@ -649,15 +660,22 @@ were corrected. Do not repeat development runs just to improve the result.
 Before eventual local final measurement, verify actual context/model/runtime;
 do not silently substitute 8k for the measured 4k condition.
 
-### C. M5 Docker — next job · D. M6 deploy · E. M7 docs
+### C. M5 completed · D. M6 deploy — next job · E. M7 docs
+
+M5's clean-checkout CLI build is proven; do not confuse it with a deployed HTTP
+service. The default image is non-root and has immutable code/data, with no
+Ollama/model weights. Future final evaluation must retain persistent results
+and the original task directory's one-use ledger. No final measurement yet.
+
 - Deploy target: **Hugging Face Spaces (Docker SDK)**. Chosen for survivability
   — no card, no billing, cannot silently die. Railway/Render/Fly rejected.
 - Landing page is the **static eval report**, not the live agent. The live
   `/ask` form is best-effort behind a free hosted open-weight model (Groq free
   tier) and **must degrade to "temporarily unavailable — full report below"**,
   never a stack trace.
-- `deploy/azure.sh` committed and documented; running it is **optional and
-  card-gated**. An unrun script is weak evidence and the README must say so.
+- `deploy/azure.sh` must be committed and documented during M6; it does **not**
+  exist yet, despite the earlier handoff's wording. Running it is **optional
+  and card-gated**. An unrun script is weak evidence and the README must say so.
 - Demo rate limits are a non-negotiable before the link is public: ~100
   requests/day global, 5/min per IP, `max_steps=8`, short `max_tokens`.
 - M7 needs `scripts/study_*.py` — an executable walkthrough where **every claim
