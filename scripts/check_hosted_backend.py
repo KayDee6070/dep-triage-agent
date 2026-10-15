@@ -208,9 +208,7 @@ def main() -> int:
 
     print(f"{GREEN}GO.{RESET} The backend can drive the agent.")
     if checks.warnings:
-        print(
-            f"\n{YELLOW}{len(checks.warnings)} caveat(s) to record in the report, not ignore:{RESET}"
-        )
+        print(f"\n{YELLOW}{len(checks.warnings)} caveat(s) to record, not ignore:{RESET}")
         for item in checks.warnings:
             print(f"  {YELLOW}!{RESET} {item}")
     print(
