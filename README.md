@@ -13,7 +13,7 @@ harness that measures whether it actually works.**
 | Day | 2 of 14 (started 2026-10-08, deadline 2026-10-21) |
 | Tests | 135, 2.5 s · ruff clean · mypy `strict` |
 | Clone to green | **18 s** cold cache (budget 60 s) |
-| Fixture | 80 packages, 1487 advisories, snapshot 2026-10-08 |
+| Fixture | 80 packages, 1487 advisories, snapshot 2026-10-09 |
 | Results | **None.** Measured once on 2026-10-20 — see [Results](#results) |
 
 Nothing here claims a measurement that has been taken. The Results table is
