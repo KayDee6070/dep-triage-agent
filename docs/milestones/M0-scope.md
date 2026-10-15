@@ -731,6 +731,35 @@ Not "polished". Done when all six hold:
 
 ## 16. Revision history
 
+### 2026-10-15 — the deployment target changed under us
+
+Hugging Face now requires a PRO subscription to run **Docker** or **Gradio**
+Spaces on free hardware; only **Static** Spaces remain free. §9 chose Spaces
+specifically because it needed no card, so that reason no longer holds for the
+Docker SDK.
+
+Verified rather than assumed: creating a Space with `sdk: docker` and
+`sdk: gradio` both return HTTP 402 with that message, while `sdk: static`
+returns 200. Probe Spaces were deleted immediately.
+
+**Resolved by splitting the deployment**, which keeps every constraint:
+
+- **The public link is a Static Space** serving the evaluation report. Free
+  for everyone, no card, nothing to lapse — which is exactly the survivability
+  criterion §9.1 ranked above all others. §9.3 had already made the report the
+  landing page, so the primary artifact is unaffected.
+- **The service is published as a container image to GHCR**, free for public
+  images and pushed by CI with its own token. Anyone can run the whole thing,
+  live agent included, with `docker run -p 8000:8000`.
+
+What is lost: the live `/ask` endpoint on the public URL. §9.3 always described
+it as best-effort and secondary, and the README now states plainly that the
+public link is static and why, rather than implying a running service.
+
+Paying $9/month for PRO was rejected: $0 is a hard constraint (§1), and a
+subscription is a recurring liability on a link meant to outlive a job search —
+the same objection that eliminated the card-requiring hosts in §9.4.
+
 ### 2026-10-15 — exposure correction approved by Kuntal
 
 The cold-start audit matched the redis and certifi results in

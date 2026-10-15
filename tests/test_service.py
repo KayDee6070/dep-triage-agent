@@ -428,3 +428,26 @@ def test_committed_report_is_current() -> None:
     assert committed.read_text(encoding="utf-8") == expected, (
         "results/report.html is stale; run: uv run dep-triage report --output results/report.html"
     )
+
+
+def test_space_metadata_satisfies_the_hub_limits() -> None:
+    """The Hub rejects a push on YAML metadata, after the Space already exists.
+
+    Caught in deployment rather than locally the first time: short_description
+    has a 60-character limit that nothing warns about until the push is
+    declined by a pre-receive hook.
+    """
+    readme = (REPO_ROOT / "deploy" / "hf-space" / "README.md").read_text(encoding="utf-8")
+    assert readme.startswith("---\n"), "Space README needs YAML front matter"
+    front_matter = readme.split("---", 2)[1]
+
+    fields = dict(line.split(":", 1) for line in front_matter.strip().splitlines() if ":" in line)
+    cleaned = {key.strip(): value.strip() for key, value in fields.items()}
+
+    assert cleaned.get("sdk") == "static", "free hosting requires the static SDK"
+    assert len(cleaned.get("short_description", "")) <= 60, (
+        f"short_description is {len(cleaned.get('short_description', ''))} chars; "
+        "the Hub rejects anything over 60"
+    )
+    for required in ("title", "sdk", "license"):
+        assert required in cleaned, f"Space front matter is missing {required}"

@@ -390,6 +390,26 @@ wrong for any replicated deployment.
 tested; no Prometheus instance runs against it. Honest instrumentation, not a
 monitoring stack.
 
+### Live
+
+**Report:** https://huggingface.co/spaces/KayDee6070/dep-triage-agent
+
+**The whole service, including the live agent:**
+
+```bash
+docker run --rm -p 8000:8000 ghcr.io/kaydee6070/dep-triage-agent:latest
+```
+
+Then `http://localhost:8000` for the report, `/health`, `/metrics`, `/docs`,
+and `POST /ask`.
+
+The public link is **static**, deliberately. Hugging Face now requires a paid
+subscription to host a Docker Space on free hardware, and this project has a
+hard zero-cost constraint. A page that cannot be billed for cannot lapse, which
+was the deciding criterion when the host was chosen — so the report is hosted
+and the service is published as an image instead. The README does not pretend a
+live service is running at that URL.
+
 ### Deployment
 
 `deploy/publish_hf_space.sh` packages and publishes to Hugging Face Spaces;

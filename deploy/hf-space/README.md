@@ -3,11 +3,10 @@ title: Dependency Triage Agent
 emoji: 🔎
 colorFrom: indigo
 colorTo: gray
-sdk: docker
-app_port: 8000
+sdk: static
 pinned: false
 license: mit
-short_description: A tool-using agent for dependency security triage, and the eval harness that measures it
+short_description: Does tool routing help? Measured, not assumed.
 ---
 
 # Dependency triage agent
@@ -34,32 +33,30 @@ Routing only wins where exhaustive calling structurally cannot compete. The
 fault arm shows one such case: under an injected tool error both baselines
 crash outright, and the agent does not.
 
-## Endpoints
+## Why this page is static
 
-| | |
-|---|---|
-| `GET /` | The evaluation report. Always available. |
-| `POST /ask` | The live agent. Best-effort; see below. |
-| `GET /health` | Liveness and current demo quota usage. |
-| `GET /metrics` | Prometheus exposition. |
-| `GET /docs` | OpenAPI schema. |
+This Space serves the evaluation report and nothing else, because Hugging Face
+now requires a paid subscription to host a Docker Space on free hardware. The
+project has a hard zero-cost constraint, and a link that cannot be billed for
+is a link that cannot quietly die — which was the deciding criterion when the
+host was chosen.
+
+**The service itself is real and runs.** It is a FastAPI application with a
+live agent endpoint, structured logging, Prometheus metrics, and rate limits
+enforced before the model is reached. It is built, hardened and verified in CI
+against a container with no network, a read-only root filesystem and all
+capabilities dropped.
+
+Run it yourself in one command:
 
 ```bash
-curl -s -X POST "$SPACE_URL/ask" \
-  -H 'content-type: application/json' \
-  -d '{"question": "Is urllib3==1.26.4 vulnerable?"}'
+docker run --rm -p 8000:8000 ghcr.io/kaydee6070/dep-triage-agent:latest
 ```
 
-## The live agent is deliberately limited
-
-This is a free demo with a real model behind it, so it is capped: a global
-daily request limit and a per-client per-minute limit, both enforced before
-the model is reached. Exceeding either returns HTTP 429 with `Retry-After`.
-
-If the model backend is unreachable, `/ask` returns HTTP 503 with a short
-notice. **The report is unaffected** — that asymmetry is the design, because
-the measured results are the evidence and the live form is only a
-demonstration.
+Then open <http://localhost:8000> for this same report, plus `/health`,
+`/metrics`, `/docs`, and `POST /ask` for the live agent. The agent needs a
+model backend configured; without one it returns a notice and the report still
+serves.
 
 ## Do not use this to audit real dependencies
 
